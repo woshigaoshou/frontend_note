@@ -25,7 +25,7 @@ quote_type = double               # 字符串使用双引号
 indent_size = 2                     # 使用2个空格缩进
 ```
 
-###  二、eslint + prettier
+###  二、eslint + prettier(shift+alt+f)
 
 ```
 // .eslintrc.js
@@ -102,4 +102,20 @@ public/
 2. npx husky-init && npm install
 3. 按照个人需求修改.pre-commit命令
 ```
+
+### 四、区分不同环境
+
+1. 根据`process.env.NODE_ENV`
+   - 开发环境：`development`
+   - 测试环境：`test`
+   - 生产环境：`production`
+2. 配置环境变量：
+   - 开发环境：`.env.development`
+   - 测试环境：`.env.test`
+   - 生产环境：`.env-prodction`
+3. 打包：配置 `publicPath`，之后会在静态资源的前面拼接`publicPath`的路径
+
+### 五、兼容浏览器
+
+- `.browerserlistrc`
 

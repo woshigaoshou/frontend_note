@@ -190,6 +190,7 @@ function getLength(something: string | number): number {
   + 防止追加类型时需要同时添加好几个，此时使用泛型
   + extends，用于指定传入哪几种类型，对传入泛型进行限制
    ```typescript
+    // 泛型函数
     function test
     <
      T extends number | string,
@@ -198,6 +199,11 @@ function getLength(something: string | number): number {
      console.log(a, b)
     }
     test<number, string>(18, "b-name")
+
+    // 通过泛型约束函数返回值
+    function useStore(): Store<IStoreType> {
+      return useVuexStore()
+    }
     // 泛型接口
     interface IPerson<T1 = string, T2 = number> {
         name: T1,
@@ -255,4 +261,5 @@ namespace time {
         export function ajax(settings: any): any
     }
   ```
+
 

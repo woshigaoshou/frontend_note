@@ -10,6 +10,7 @@
 
 ### 三、实战
 - [学习文章](https://juejin.cn/post/7023242274876162084#heading-0)
+
 - `loader`：webpack 默认支持处理 JS 与 JSON 文件，其他类型都处理不了，处理css等其他类型的文件时必须借助 Loader 来对不同类型的文件的进行处理。Loader 就是将 Webpack 不认识的内容转化为认识的内容。
 - `plugin`：Plugin可以贯穿 Webpack 打包的生命周期，执行不同的任务
 - 常见loader和plugin
@@ -91,3 +92,5 @@
         loadingComponent: Loading(占位组件，如loading组件),
        });
      ```
+
+- `require.context`：通过获取上下文获取文件路径，接受三个参数`path`、`recurse`、`reg`，可以通过该函数动态导入文件。
