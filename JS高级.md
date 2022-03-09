@@ -160,6 +160,8 @@
 
 6. 面试题：https://mp.weixin.qq.com/s/hYm0JgBI25grNG_2sCRlTA
 
+7. 实现 `call` 、`apply `和 `bind` 函数(参照手写文档)
+
 
 ### 六、ES6~ES12
 
