@@ -163,7 +163,72 @@
 7. 实现 `call` 、`apply `和 `bind` 函数(参照手写文档)
 
 
-### 六、ES6~ES12
+### 六、函数式编程
+
+1. 高阶函数：接收一个或多个函数输入，输出一个函数
+2. 纯函数：
+
+- 函数有确定的输入值时，需要产生相同的输出
+- 函数执行的过程中，不能产生副作用（除了返回值以外，对函数以外的范围产生了影响，如修改了全局变量）
+
+3. 柯里化：
+
+- 一个函数接收一些参数，返回值是能接收剩余参数的原函数，需要额外注意的是需要给原函数绑定`this`(返回函数的`this`)
+
+- ```js
+  // 参数定长的柯里化
+  function nilCurry(fn) {
+    const argLen = fn.length;
+    const presetArgs = [].slice.call(arguments, 1);
+    return function(...args) {
+      const allArgs = [...presetArgs, ...args];
+      if (allArgs.length >= argLen) {
+        return fn.apply(this, allArgs);
+      }
+      return nilCurry.call(null, fn, ...allArgs);
+    }
+  }
+  // 不定长的柯里化
+  function add(fn) {
+    const args = [].slice.call(arguments, 1);
+    const _add = function() {
+      args.push(...arguments);
+      return _add;
+    }
+    _add.sumof = function() {
+      return args.reduce((prev, cur) => {
+        return prev + cur;
+      });
+    }
+    return _add;
+  }
+  ```
+
+4. 组合函数：同时传入多个函数，每个函数的实参为前一个参数的执行结果(第一个函数的实参由新生成的函数传入)
+
+   ```js
+   function nilCompose(...fns) {
+     const length = fns.length;
+     for (let i = 0; i < length; i++) {
+       if (typeof fns[i] !== 'function') {
+         throw new TypeError('Expected arguments are function');
+       }
+     }
+     function compose(...args) {
+       let index = 0;
+       let result = length ? fns[index].call(this, args) : args;
+       while(++index < length) {
+         result = fns[index].call(this, result);
+       }
+       return result;
+     }
+     return compose;
+   }
+   ```
+
+   ​
+
+### 七、ES6~ES12
 
 1. 箭头函数：
    - 不会绑定 `this` 和 `arguments` 
