@@ -50,7 +50,7 @@
    - 为了提高效率， 利用 `TurboFan` 模块对字节码进行转换，并标记函数是否为 `hot` (重复使用的函数，便于缓存)，使其更接近与对应环境的字节码
    - 将优化后的字节码转换为机器码并由CPU执行
 
-### 二、执行上下文栈(Execution Context Stack)
+### 二、执行上下文栈(Execution Context Stack，ES6前)
 
 1. 在转换为 `AST` 的过程中，V8引擎会创建一个 `Global Object(全局对象，简称GO)`。 
 
@@ -226,10 +226,361 @@
    }
    ```
 
-   ​
 
-### 七、ES6~ES12
+### 七、补充
 
-1. 箭头函数：
-   - 不会绑定 `this` 和 `arguments` 
-   - 不能与 `new` 一起使用，会抛出错误
+1. with语句：
+
+   ```js
+   with(obj) {
+     console.log(name); // 优先寻找obj内的变量，可以形成自己的作用域
+   }
+   ```
+
+2. eval函数：
+
+   ```js
+   const jsString = 'var message = "hello world"; console.log(message);'
+   eval(jsString);     // 将字符串转成js代码并执行
+   ```
+
+3. 严格模式：严格模式是一种具有限制性的`JavaScript`模式，使代码脱离"懒散(sloppy)"模式。支持严格模式的浏览器在检测到严格模式时，会以更加严格的方式对代码进行检测和执行。
+
+- 严格模式作用：
+  + 通过抛出错误来消除一些原有的静默错误(语法错误，但对执行不影响，如`xxx.name = 1`)
+  + 严格模式让JS引擎在执行代码时有更多的优化(不需要处理一些特殊的语法)
+  + 严格模式禁用了未来ECMAScript版本可能会定义的一些语法
+
+- 开启严格模式：
+  + 全局开启：在全局里面使用`use strict`
+  + 局部开启：在函数使用`use strict`
+
+- 严格模式常见规则：
+
+  ```js
+  // 1. 禁止意外创建全局变量
+  use strict;
+  function foo() {
+    age = 20;
+  }
+  // 2. 不允许有相同参数名
+  function fn(x, y, x) {
+    console.log(x, y, x);
+  }
+  // 3. 静默错误
+  const obj = {};
+  obj.defineProperty(obj, 'name', {
+    writable: false,
+    value: 'nil'
+  });
+  obj.name = 'john';
+  // 4. 不允许使用with语句
+  with(obj) {
+    console.log(name);
+  }
+  // 5. eval语句不会向上引用变量
+  const jsString = 'var message = "hello world"; console.log(message);'
+  eval(jsString);
+  console.log(message);
+  // 6. 自执行函数报undefined
+  function add() {
+    console.log(this);  // undefined
+  }
+  // 7. setTimeout内部的回调使用function定义，仍指向window（chromium源码使用了apply）
+  setTimeout(function () {
+    console.log(this);  // window
+  }, 1000);
+  ```
+
+### 八、面向对象
+
+1. 对象的操作：
+
+   - `Object.defineProperty` (get和set不能与value和writable混合使用)：
+
+     + 数据属性描述符：
+
+       ```js
+       const obj = {
+         name: 'nil'            // 直接添加的成员也有属性描述符，value为赋予的值，其他为true
+       };
+       object.defineProperty(obj, 'address', {
+         configurable: false,   // 默认为false，此时不能被删除或者重新使用描述符定义
+         value: 'shenzhen'      // 默认为undefined
+         enumberable: false,    // 默认为false，能否被枚举
+         writable: false        // 默认为false，能否被重新赋值
+       });
+       ```
+
+     + 访问属性描述符：
+
+       ```js
+       // 1. 用于隐藏私有属性
+       // 2. 用于截获获取或赋值的过程
+       const obj = {
+         name: 'nil',           // 直接添加的成员也有属性描述符，value为赋予的值，其他为true
+         _address: 'shenzhen'
+       };
+       object.defineProperty(obj, 'address', {
+         configurable: false,   // 默认为false，此时不能被删除或者重新使用描述符定义
+         enumberable: false,    // 默认为false，能否被枚举
+         get() {                // 默认为undefined
+           return this._address;
+         },
+         set(newVal) {                // 默认为false，能否被重新赋值
+           this._address = newVal;
+         }
+       });
+       ```
+
+   - `Object.defineProperties` (一次定义多个属性描述符)：
+
+     ```js
+     const obj = {
+       _name: 'nil',
+       _age: 19,
+       // 直接在对象内定义属性描述符，此时configurable和enumberable为默认值
+       set age() {
+         return this._age;
+       },
+       get age(value) {
+         this._age = value;
+       }
+     };
+     obj.defineProperties(obj, {
+       name: {
+         get() {
+           return this._name;
+         },
+         set(value){
+           this._name = value;
+         },
+         configurable: false,
+         enumberable: true,
+       },
+       address: {
+         value: 'shsenzhen',
+         writable: true,
+         configurable: false,
+         enumberable: false,
+       },
+     });
+     ```
+
+   - `Object.preventExtensions`：禁止向对象里面添加属性
+
+   - `Object.seal` ：禁止对象配置/删除属性
+
+   - `Object.freeze`：禁止对象修改属性(冻结)
+
+2. 对象的特性：
+
+   - 封装
+   - 继承
+   - 多态：对不同数据类型，执行相同操作，表现出来的行为不同
+
+3. 创建对象的方案：
+
+   - 工厂模式：使用`new`操作符批量创建（创建过程参考手写代码），缺点是重复创建了多个相同的方法，可通过原型来解决该问题
+     + 使用`Object.create(fn.prototype)`创建空对象，同时将空对象原型指向构造函数原型
+     + 构造函数内部的`this`会指向空对象：`fn.call(obj, ...arguments)`
+     + 指向构造函数内部代码
+     + 判断是否返回一个非空对象，若是非空对象则返回该对象，否则返回之前创建的对象
+
+4. 对象的原型：
+
+   + 作用：当获取实例的属性找不到时，会去实例的原型去寻找
+
+   - 获取实例的原型：`Object.getPrototypeOf`
+
+   - 每个构造函数都有一个`[[prototype]]`指向原型，同时原型有一个属性`constructor`指向构造函数，`constructor`属性通过属性描述性设置了不可枚举，需要通过`instance.getOwnPropertyDescriptors`获取属性描述器查看
+
+   - 构造函数使用`new`操作符后会创建出实例，该实例存在`__proto__`属性指向原型对象
+
+   - 当使用对象覆盖`[[prototype]]`时，需要将该对象的`constructor`属性指回构造函数，但之前创建的对象`__proto__`仍指向原来的原型
+
+     ```js
+     foo.prototype = {
+       name: 'nil',
+       // ...
+     };
+     Object.defineProperty(foo.prototype, 'constructor', {
+       enumberable: false,
+       configurable: true,
+       writable: true,
+       value: foo
+     });
+     ```
+
+5. 原型链
+
+   - 顶层原型：`[Object: null prototype] {}`
+
+     + 内部包含多个方法，但都是不可枚举的
+     + 顶层原型的`__proto__`指向null
+     + 从一个对象里面获取属性，会沿着原型链一直查找
+
+   - 原型链如下图所示：
+
+     * 所有构造函数的`prototype`都是一个对象，由`Function Object`创建，因此这些`prototype`的`__proto__`都指向`Object.prototype`
+     * 所有的`function`都由`function Function`创建(包括自身，`Function.__proto__`指向`Function.prototype`)，因此这些`function`的`__proto__`都指向`Function.prototype`
+     * 最终`Object.prototype`指向`null`
+
+     ![原型链](E:\前端学习\frontend_note\图\原型链.jpg)
+
+6. 继承的实现：
+
+   - 类的三大特性：封装(将方法和属性封装在类上)、继承(子类继承父类)和多态(不同对象表现不同状态)
+
+   - 继承的方式：
+
+     ```js
+     // 直接使用new创建，内存消耗大，相同的方法重复创建，所以使用以下的继承方案
+     function Animal() {
+       this.name = 'Tom';
+     }
+
+     // 1. 原型链继承，父类实例存在引用类型时，多个实例会同时修改一份数据，且父类的数据无法接受参数
+     function Person() {
+       this.name = 'person';
+     }
+     Person.prototype.log = function() {
+       console.log(this, this.name);
+     }
+     const person = new Person();
+     function Student() {}
+     Student.prototype = person;
+     const student = new Student();
+     student.log();    // 此时在student实例上找不到log方法，沿着原型链向上找，最终找到Person的原型链上的log方法，利用隐式绑定调用，打印this(student实例，this指向Student实例)和this.name(在this(student)上寻找name属性,最终在person的实例上找到)
+
+     // 2. 借用构造函数继承
+     // 解决了原型链继承的问题
+     // 缺点：
+     // 1)只能继承父类实例的属性和方法，不能继承原型上的方法
+     // 2)每个子类都有父类的副本，重复创建
+     function Person(name) {
+       this.name = name;
+     }
+     function Student(name, age) {
+       Person.call(this, name);
+       this.age = age;
+     }
+
+     // 3. 组合继承
+     // 解决了以上两种继承的问题
+     // 缺点：
+     // 1)但父类至少被调用两次
+     // 2)多出一些无用的属性(存在两份相同的属性和方法)
+     function Person(name) {
+       this.name = name;
+     }
+     Person.prototype.log = function() {
+       console.log(this, this.name);
+     }
+     const person = new Person();
+     function Student(name, age) {
+       Person.call(this, name);
+       this.age = age;
+     }
+     Student.prototype = person;
+     const student = new Student('Tom', 18);
+
+     // 4.原型式继承
+     // 缺点：
+     // 1)无法传递参数
+     // 2)原型链上存在引用值会篡改同一份
+     function createObj(o) {
+       function fn(){};
+       fn.prototype = o;
+       return new fn();
+     }
+     function Person() {
+       frends: []
+     }
+     const obj1 = createObj(Person);
+     obj1.name = 'John';
+     obj1.frends.push('John');
+     const obj2 = createObj(Person);
+     obj1.name = 'Tom';
+     obj1.frends.push('Tom');
+
+     // 5.寄生式继承
+     // 缺点：同原型式继承，利用了工厂函数进行创建
+     function createObj(o) {
+       function fn() {}
+       fn.prototype = o;
+       return new fn();
+     }
+     function creatAnother(original) {
+       const clone = createObj(original);
+       clone.log = function() {
+         console.log(this);
+       }
+       return clone;
+     }
+
+     // 6.寄生组合式继承
+     function createObject(o) {
+       function fn() {};
+       fn.prototype = o;
+       return new fn();
+     }
+     function inheritPrototype(subType, superType) {
+       subType.prototype = createObject(superType);
+       Object.defineProperty(subType.prototype, 'constructor', {
+         enumberable: false,
+         configurable: true,
+         writable: true,
+         value: subType
+       });
+     }
+     function SuperType(name) {
+       this.name = name;
+       this.colors = ['blue', 'red'];
+     }
+     SuperType.prototype.sayName = function() {
+       console.log(this.name);
+     }
+     function SubType(name, age) {
+       SuperType.call(this, name);
+       this.age = age;
+     }
+     SubType.prototype.sayAge = function() {
+       console.log(this.age);
+     }
+
+     // 7.class继承
+     class Student extends Person {
+       // 添加额外方法等操作...
+     }
+
+     // 8.JS是单继承，不能同时继承多个类，需要实现混入继承
+     function Person(name) {
+       this.name = name;
+     }
+     function Student(name, age) {
+       Person.call(this, name);
+       this.age = age;
+     }
+
+     function Other () {}
+     Other.prototype.otherMethod = function() {
+       console.log('other');
+     }
+
+     Student.prototype = Object.create(Person.prototype);
+     console.log(Student.prototype);
+         
+     Object.assign(Student.prototype, Other.prototype);
+
+     const stu = new Student(18);
+     console.log(stu);
+         
+     stu.otherMethod();
+     ```
+
+7. 原型内容补充：
+
+   - `hasOwnProperty`：是否具有自己的属性，在原型上则返回false
+   - `in`：在原型或自身上都返回true
+   - `instanceof`：判断构造函数的`prototype`是否在实例的原型链上

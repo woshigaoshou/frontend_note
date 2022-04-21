@@ -46,3 +46,13 @@ Array.from(arguments);
 [...arguments];
 ```
 
+### 三、实现new
+
+```js
+function nilNew(fn) {
+  const obj = Object.create(fn.prototype);
+  const result = fn.call(obj, ...arguments);
+  return result instanceof Object ? result : obj;
+}
+```
+

@@ -185,6 +185,24 @@ function getLength(something: string | number): number {
   const info2: Person = info1;
   ```
   + 可重复定义：两个相同命名的接口内部属性会进行合并
+
+  + type与interface的区别：
+
+    ```js
+    type Name = string; // 定义别名
+    type union = string | number;  // 联合类型
+    type animal = 'CAT' | 'DOG';  // 定义常量类型
+
+    // 相同的接口声明会进行合并
+    interface IInfo {
+      name: string
+    }
+    interface IInfo {
+      age: number
+    }
+    ```
+
+    ​
 - 泛型(generics)：
   + 作用：将类型进行参数化
   + 防止追加类型时需要同时添加好几个，此时使用泛型
