@@ -547,7 +547,30 @@
   /** ES11 */
   1. BigInt						// const num = BigInt(10);或const num = 10n;
   2. ??							// 空值合并运算符，能准确判断是否为undefined
-  3. 
+  3. ?.							// optionalChaining，可选链
+  4. globalThis(浏览器和Node都能获取)// 获取全局this，需要看浏览器和node版本是否支持
+
+  /** ESS12 */
+  1. FinalizationRegistry			// 监听对象的销毁
+  const finalRegistry = new FinalizationRegistry((value) => {
+  	console.log(value + '被销毁了');	// obj对象被销毁了
+  });
+  const obj = {
+  	name: 'nil'
+  };
+  finalRegistry.register(obj, 'obj对象');
+  obj.null;
+
+  2. WeakRef						// 通过弱引用，去引用一个对象(不影响垃圾回收机制)
+  let obj = { name: 'nil' };
+  let info = new WeakRef(obj);
+  obj = null;
+  console.log(info.deref());		// undefined
+
+  3. 逻辑或/与/空赋值运算
+  let msg = undefined;
+  msg ||= 'nil';					// nil
+
   ```
 
   ​
