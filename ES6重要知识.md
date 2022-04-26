@@ -167,7 +167,6 @@
 
   ```js
   /** 手写Promise A+规范 */
-  // 26分开始
   class nilPromise {
     // Promise有三种状态
     static PENDING = 'pending';
@@ -306,6 +305,95 @@
         }
       });
       return promise2;
+    }
+    static resolve (value) {
+      // if (value instanceof nilPromise) {
+      //   return value;
+      // } else if (typeof value === 'object' && 'then' in value) {
+      //   return new nilPromise((resolve, reject) => {
+      //     value.then(resolve, reject);
+      //   });
+      // }
+      // return new nilPromise((resolve, reject) => resolve(value));
+      return new nilPromise(resolve => resolve()).then(() => value);
+    }
+    static reject(reason) {
+      return new nilPromise((resolve, reject) => {
+        reject(reason);
+      });
+    }
+    catch (onRejected) {
+      return this.then(undefined, onRejected);
+    }
+    finally (callback) {
+      return this.then(callback, callback); // 不传参数则外层嵌套一层function
+    }
+    static all (promises) {
+      if (promises.length === 0) return nilPromise.resolve([]);
+      return new nilPromise((resolve, reject) => {
+        let count = 0;
+        const result = [];
+        for (const index in promises) {
+          nilPromise.resolve(promises[index])
+            .then(res => {
+              result[index] = res;
+              if (++count === promises.length) resolve(result);
+            })
+            .catch(reason => {
+              reject(reason);
+            });
+        }
+      });
+    }
+    static allSettled (promises) {
+      if (promises.length === 0) return nilPromise.resolve([]);
+      return new nilPromise((resolve, reject) => {
+        let count = 0;
+        const result = [];
+        for (const index in promises) {
+          nilPromise.resolve(promises[index])
+            .then(res => {
+              result[index] = {
+                status: 'fulfilled',
+                value: res
+              };
+              if (++count === promises.length) resolve(result);
+            })
+            .catch(reason => {
+              result[index] = {
+                status: 'rejected',
+                reason
+              };
+              if (++count === promises.length) resolve(result);
+            });
+        }
+      });
+    }
+    static race (promises) {
+      if (promises.length === 0) return nilPromise.resolve([]);
+      return new nilPromise((resolve, reject) => {
+        for (const promise of promises) {
+          nilPromise.resolve(promise)
+            .then(resolve, reject);
+        }
+      });
+    }
+    static any (promises) {
+      if (promises.length === 0) return nilPromise.resolve(new Error('All promises were rejected'));
+      return new nilPromise((resolve, reject) => {
+        const errors = [];
+        let count = 0;
+        for (const index in promises) {
+          nilPromise.resolve(promises[index])
+            .then(res => {
+              resolve(res);
+            })
+            .catch(reason => {
+              errors[index] = reason;
+              if (++count === promises.length) resolve(errors);
+            });
+        }
+      });
     }
   }
 
