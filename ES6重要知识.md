@@ -411,7 +411,148 @@
   ```
 
 
-  ### 三、迭代器
+  ### 三、迭代器和生成器（Iterator Generator）
+
+![iterator and  generator](E:\前端学习\frontend_note\图\iterator and  generator.jpg)
+
+- 定义：迭代器(iterator)是一个具体的对象，需要符合迭代器协议，在JS中的体现是`next`方法
+
+- `next` 方法的要求：
+
+  + 一个无参或者	一个参数的函数：需要返回一个具有以下参数的对象：
+    * `done`：`boolean`类型
+    * `value` ：迭代器返回的值，`done` 为true时可忽略
+
+- 可迭代对象(iterable Object)： 是指一个内部包含`Symbol.iterator` 方法的对象，该方法返回一个迭代器
+
+  ```js
+  // 数组迭代器
+  const arrIterator = function (arr) {
+    let index = 0;
+    return {
+      next() {
+        return index < arr.length
+    		? { done: false, value: arr[index++] }
+    		: { done: true, value: undefined };
+      }
+    };
+  };
+    
+  // 可迭代对象，当对象具有迭代器时，使用展开运算符会优先使用迭代器，而不是类似entries的功能
+  const iterableObj = {
+    id: 1,
+    name: 'nil',
+    age: 18,
+    [Symbol.iterator]: function () {
+      const keys = Object.keys(this);
+      let index = 0;
+      // 该对象是一个迭代器
+      return {
+        next: () => {
+            return index < keys.length
+          ?  { done: false, value: this[keys[index++]] }
+          :  { done: true, value: undefined };
+        },
+        // break终止
+        return: () => {
+          return { done: true, value: undefined };
+        }
+      };
+    }
+  };
+    
+  ```
+
+- 生成器：
+
+  ```js
+  /** 生成器是一个特殊的迭代器 */
+  // 打印顺序 1 2 2 3 3 4
+  function* generatorFn (value1) {
+    console.log(value1);
+    const value2 = yield value1 + 1;	// 返回值给外部value2，内部的value2接受到外部的value2
+    console.log(value2);
+    const value3 = yield value2 + 1;	// 返回值给外部value3，内部的value3接受到外部的value3
+    console.log(value3);
+    return value3 + 1;				// return相当于最后一次yield，返回值为{ done: true, value: 4 }
+  }
+  const generator = generatorFn(1);	// 拿到一个迭代器对象
+  console.log(generator);
+  const { value: value2 } = generator.next();	// 第一个next由于前面没有yield，因此第一个参数需要通过genaratorFn传递，value2 -> 2
+  console.log(value2);
+  const { value: value3 } = generator.next(value2);	// value3 -> 3
+  console.log(value3);
+  const { value: value4 } = generator.next(value3);	// value4 -> 4
+  console.log(value4);
+
+  /** 其他方法 */
+  generator.return();		// 直接终止，此时done为true
+  generator.throw();		// 抛出异常，若异常被捕获，则可以继续.next
+
+  /** 生成器函数替代迭代器 */
+  function* generator (arr) {
+    yield* arr;			// yield* 相当于下面的for...of 写法
+    
+    // for (const item of arr) {
+    //   yield item;
+    // }
+  }
+
+  ```
+
+- `async`、`await` 原理：
+
+  ```js
+  /** 原理实际是使用一个自动执行生成器的函数 */
+  function req (value) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(value + 1);
+      }, 500)
+    });
+  }
+
+  function* getData (value) {
+    const res1 = yield req(value);
+    const res2 = yield req(res1);
+    const res3 = yield req(res2);
+    const res4 = yield req(res3);
+    return res4;
+  }
+
+  function execGenerator (generatorFn, ...args) {
+    const generator = generatorFn(...args);
+    const _exector = (res) => {
+      const result = generator.next();
+      if (result.done) return result.value;
+      result.value.then(res => {
+        _exector(res);
+      });
+    }
+    _exector();
+  }
+
+  /** 下面的写法相当于上述代码的语法糖
+   *	async 内部没有异步代码时，执行顺序与普通函数一样
+   *	async函数返回一个promise
+   *	当内部代码报错时，会终止代码的执行
+   */
+  async function getData (value) {
+    const res1 = await req(value);
+    const res2 = await req(res1);
+    const res3 = await req(res2);
+    const res4 = await req(res3);
+    return res4;
+  }
+
+  ```
+
+### 四、EventLoop
+
+- 进程与线程的区别：
+  + 进程是cpu资源分配的最小单位（能拥有资源和独立运行的最小单位）
+  + 线程是cpu运算调度的最小单位（一个进程里面可以包含多个线程）
+- `JS`是单线程的，它的容器是浏览器或者`Node`
 
 
 
