@@ -307,15 +307,16 @@
       return promise2;
     }
     static resolve (value) {
-      // if (value instanceof nilPromise) {
-      //   return value;
-      // } else if (typeof value === 'object' && 'then' in value) {
-      //   return new nilPromise((resolve, reject) => {
-      //     value.then(resolve, reject);
-      //   });
-      // }
-      // return new nilPromise((resolve, reject) => resolve(value));
-      return new nilPromise(resolve => resolve()).then(() => value);
+      if (value instanceof nilPromise) {
+        return value;
+      } else if (typeof value === 'object' && 'then' in value) {
+        return new nilPromise((resolve, reject) => {
+          value.then(resolve, reject);
+        });
+      }
+      return new nilPromise((resolve, reject) => resolve(value));
+      // 下面的写法会将promise.resolve变成微任务
+      // return new nilPromise(resolve => resolve()).then(() => value);
     }
     static reject(reason) {
       return new nilPromise((resolve, reject) => {
@@ -521,21 +522,30 @@
   }
 
   function execGenerator (generatorFn, ...args) {
-    const generator = generatorFn(...args);
-    const _exector = (res) => {
-      const result = generator.next();
-      if (result.done) return result.value;
-      result.value.then(res => {
-        _exector(res);
+    return function () {
+      const generator = generatorFn(...args);
+      return new Promise((resolve, reject) => {
+    	  const _exector = (type, arg) => {
+          let result;
+          try {
+            result = generator[type](arg);
+          } catch (err) {
+            return reject(err);
+          }
+    	  const { done, value } = result;
+    	  if (done) resolve(value);
+    	  return Promise.resolve(value).then(val => _exector('next', val), err => _exector('throw', err));
+    	}
+        _exector('next');
       });
     }
-    _exector();
   }
 
   /** 下面的写法相当于上述代码的语法糖
    *	async 内部没有异步代码时，执行顺序与普通函数一样
    *	async函数返回一个promise
    *	当内部代码报错时，会终止代码的执行
+   *	await 等待执行的代码会用一个promise进行包裹，同时等待resolve之后，在then里面执行next()
    */
   async function getData (value) {
     const res1 = await req(value);
@@ -552,7 +562,267 @@
 - 进程与线程的区别：
   + 进程是cpu资源分配的最小单位（能拥有资源和独立运行的最小单位）
   + 线程是cpu运算调度的最小单位（一个进程里面可以包含多个线程）
+
 - `JS`是单线程的，它的容器是浏览器或者`Node`
 
+- 事件循环规则：每次执行宏任务前，需要先清空微任务队列
+
+  ![EventLoop规则](E:\前端学习\frontend_note\图\EventLoop规则.jpg)
+
+- 事件循环任务类型：
+
+  + 浏览器：
+
+    ![EventLoop](E:\前端学习\frontend_note\图\EventLoop.jpg)
+
+    * 事件队列类型：
+      - `microtask queue`：Promise.then、queueMicrotask、Mutation Observer  
+      - `macrotask queue`：ajax、setTimeout、setInterval、DOM监听和UI Rendering
+
+  + Node：
+
+    * 事件队列类型：每个队列的执行顺序如下
+      * `microtask queue`：
+        * `next Tick queue`：process.nextTick
+        * `other queue`：Promise.then、queueMicrotask
+      * `macrotask queue`：
+        * `timer queue`：setTimeout、setInterval
+        * `poll queue`：IO事件（Input/Output）
+        * `check queue`：setImmediate
+        * `close queue`：close事件
 
 
+### 五、错误处理
+
+- Error类：`TypeError`、`Error`、`RangeError`、`SyntaxError`等
+
+- 异常处理：
+
+  + 抛出异常后，后续的代码不会继续执行
+  + 处理方式：
+    * 不处理：会将异常继续往外抛，直到最顶层调用，此时会报错并终止程序执行
+    * 使用`try...catch`进行捕获
+
+  ```js
+  try {
+    ...handle
+  } catch (err) {
+    
+  } finally () {
+    
+  }
+  ```
+
+### 六、模块化开发
+
+- 模块化开发：将程序划分为多个小结构
+
+- `CommonJS`：适用于服务器，但由于引入加载都是同步的，因此在浏览器
+
+  + 语法规则：
+
+    ```js
+    /** 导出， 第一种 */
+    module.exports = {};
+    // 或单独变量导出，本质上exports是一个对象
+    const name = 'nil';
+    module.exports.name = name;
+
+    /** 导入 */
+    const obj = require(./xxx);
+
+    obj.name = 'John';	// 由于共享的是同一个对象，因此原文件的变量值也会被更改
+
+
+    /** 导出， 第二种，最终能导出的对象一定是module.exports指向的对象
+     *	源码内部实现逻辑为：
+     *	module.exports = {};
+     *	exports = module.exports;
+     */
+    exports.name = name;	// 导出的对象module.exports与exports是同一个
+
+    // 错误写法
+    module.exports = {name: 'nil'};
+    exports.age = 18;		// 该变量不会被导出
+
+
+    /** require规则 */
+    require(X);
+    // 1. X是Node的一个核心模块，如path、http，此时会返回核心模块，停止查找
+    // 2. X是以./或../或/(根目录)开头的，此时会按如下顺序查找：
+    //   1) 若有后缀名则直接查找后缀名
+    //   2) 若无后缀名则按照以下顺序进行查找：
+    //      - 直接查找文件X
+    //      - 查找X.js
+    //      - 查找X.json
+    //      - 查找X.node
+    //   3) 没有找到文件，则将X作为一个目录
+    //      - 查找X/index.js
+    //      - 查找X/index.json
+    //      - 查找X/index.node
+    //   4) 若查找不到，则报not found
+    // 3. x既不是核心模块，也没有路径，此时会从当前目录开始逐级往上查找每个路径上的node_modules里是否有匹配的包
+
+    ```
+
+  + require查找规则：
+
+    1. X是Node的一个核心模块，如path、http，此时会返回核心模块，停止查找
+
+    2. X是以./或../或/(根目录)开头的，此时会按如下顺序查找：
+
+       1) 若有后缀名则直接查找后缀名
+
+       2) 若无后缀名则按照以下顺序进行查找：
+
+       - 直接查找文件X
+       - 查找X.js
+       - 查找X.json
+       - 查找X.node
+
+       3)  没有找到文件，则将X作为一个目录
+
+       + 查找X/index.js
+       + X/index.json
+       + 查找X/index.node
+
+       4)  若查找不到，则报not found
+
+    3. x既不是核心模块，也没有路径，此时会从当前目录开始逐级往上查找每个路径上的node_modules里是否有匹配的包
+
+  + 模块加载过程：
+
+    + 模块在第一次被引入时，模块中的js代码会被执行一次(遇到时才进行加载)
+    + 模块在多次被引入时，会缓存，最终只被加载一次(`loaded`为true)
+    + 如果有循环引入，则按照 **深度优先搜索** 进行加载
+
+  + 模块加载案例：若存在相互引用变量，则取值会为`undefined`
+
+    ```js
+    // 打印结果为 我是b文件 -> 我是a文件 -> node 入口文件
+    /** 分析加载顺序，深度优先搜索
+     *	1. 首先进入main.js，遇到require，开始加载a.js
+     *	2. a.js第一行代码require b.js，开始加载b.js（判断无缓存）
+     *	3. b.js 引入 a.js，发现a.js已经被引入过，继续执行，打印'我是b文件'（实际上若b使用a文件的变量，此时是获取不到的）
+     *	4. b.js执行完，返回执行a.js，打印'我是a文件'
+     *	5. 最终回到main.js，打印'我是main文件'
+     */
+
+
+    // a.js
+    const getMes = require('./b')
+    console.log('我是 a 文件')
+    exports.say = function(){
+        const message = getMes()
+        console.log(message)
+    }
+
+    // b.js
+    const say = require('./a')
+    const  object = {
+       name:'《React进阶实践指南》',
+       author:'我不是外星人'
+    }
+    console.log('我是 b 文件')
+    module.exports = function(){
+        return object
+    }
+
+    // main.js
+    const a = require('./a')
+    const b = require('./b')
+
+    console.log('node 入口文件')
+    ```
+
+    ​
+
+- `ES Module`：
+
+  + 语法规则
+
+    ```js
+    /** 1. 通过export导出 */
+    // 1) 声明时导出
+    export const name = 'nil';
+    // 2) 统一导出
+    const name = 'nil';
+    const age = 18;
+    export {
+      name,
+      age as myAge
+    };
+
+    /** 2. import 导出 */
+    // 1) 导出成员
+    import { name } from './xxx.js';
+    // 2) 起别名
+    import { name as myName } from 'xxx.js';
+    // 3) 将所有内容放到一个标识符内
+    import * as foo from './xxx.js';
+
+    /** 3. import和export结合使用 */
+    export { name } from './xxx.js';
+    export * from './xxx.js';
+
+    /** 4. 默认导出 */
+    // 默认导出只能由一个，且导出不需要名字，导入可自定义名字
+    export default xxx;
+    import xxx from './xxx.js';
+
+    /** 5. 异步导入，用于实现懒加载 */
+    import('./xxx.js').then(res => {
+      console.log(res);	// 这种方式返回的是一个Promise
+    });
+    console.log('1');	// 不会阻塞下面代码的执行
+    ```
+
+  + `ESModule` 解析规则：
+
+    * 构建阶段：对代码进行静态分析，编译时确定导入导出关系，`import`语句会被提升到最上层。 生成一个`Module Record`的数据结构（记录该文件需要引入哪些模块以及导出哪些变量），同时会生成一个`Module Map`，记录每个模块对应的`Module Record`或者是否处于`fetching`状态，避免资源重复下载
+    * 实例化阶段：每个`Module Record`生成一个`Module Environment`实例，内部包含一个`Binding`属性，记录导出/导入的变量，此时变量值为`undefined`
+    * 求值阶段：对每个`Module Record`实例的`Binding`属性进行赋值
+
+  + `ESModule`在预处理阶段分析模块依赖和执行阶段执行模块都是采用深度优先搜索，若存在相互引用变量，则会报错，案例如下：
+
+    ```js
+    // 打印结果为 b模块加载 -> a模块加载 -> main.js开始执行 -> main.js执行完毕
+    /** 分析加载顺序，深度优先搜索
+     *	1. 首先进行预处理阶段分析依赖，将所有import语句提升至代码的顶层
+     *	2. 执行第一行，开始引入a.js文件
+     *	3. 执行a.js第一行，开始引入b.js文件
+     *	4. 分析结束，开始执行b.js文件
+     *	5. 执行a.js文件
+     *	6. 执行main.js文件
+     */
+
+
+    // main.js
+    console.log('main.js开始执行')
+    import say from './a'
+    import say1 from './b'
+    console.log('main.js执行完毕')
+
+    // a.js
+    import b from './b'
+    console.log('a模块加载')
+    export default  function say (){
+        console.log('hello , world')
+    }
+
+    // b.js
+    console.log('b模块加载')
+    export default function sayhello(){
+        console.log('hello,world')
+    }
+    ```
+
+  + `ESModule`一些细节：
+
+    * `import`导入的变量是只读的，无法被修改
+
+- `CommonJS` 和 `ESModule`相互引用：
+
+  + 浏览器环境：不支持CommonJS
+  + Node环境：需要看版本
+  + Webpack环境：可相互引用

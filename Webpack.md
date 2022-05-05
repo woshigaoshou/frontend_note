@@ -94,3 +94,57 @@
      ```
 
 - `require.context`：通过获取上下文获取文件路径，接受三个参数`path`、`recurse`、`reg`，可以通过该函数动态导入文件。
+
+### 四、npm
+
+- `npm` 使用 `package.json` 管理依赖，使用`npm init -y`进行初始化，-y表示都选yes
+
+- 版本规范：semver版本规范是X.Y.Z
+
+  + X主版本号(major)：做了不兼容之前版本的API
+  + Y次版本号(minor)：增加了新功能，但兼容之前的版本
+  + Z修订号(patch)：做了向下兼容的修复（修复BUG）
+
+- 依赖版本范围：
+
+  + `^x.y.z`：保持x不变，y和z安装最新版本
+  + `~x.y.z`：保持x和y不变，z安装最新版本
+
+- `package.json` 字段：
+
+  + `private`： 是否私有，为true则不允许发布到npm社区
+  + `main`：指定依赖的入口
+  + `scripts`： 指定运行的脚本，对于常用的脚本命令可以省略`run`，如：`npm start`、`npm restart`、`npm stop`、`npm test`
+  + `dependencies` ： 存放实际运行代码需要的依赖，`npm install -S`
+    * version：表示依赖版本
+    * resolved：记录下载的地址，registry仓库中的位置
+    * requires：记录当前模块的依赖
+    * integrity：用来从缓存中获取索引，再从索引里获取压缩包
+  + `devDependencies`： 开发时依赖，实际运行不需要，`npm install -D`
+  + `peerDependencies`：宿主依赖，表示依赖的包，必须以另一个宿主包为前提，如`element-plus`依赖`vue3`
+  + `engines`：指定Node和Npm版本
+
+- 执行`npm install`：
+
+  ![npm执行原理](E:\前端学习\frontend_note\图\npm执行原理.jpg)
+
+  + 根据`package.json` 下载依赖，若下载的依赖内部引入了其他依赖，则会一起下载
+  + 根据`package-lock.json`去匹配`package.json`里的依赖版本，若匹配成功则按照`package-lock.json`里的版本下载依赖，否则会按照`package.json`按照范围内最新的版本
+  + 若存在宿主依赖，则会报警告提示
+
+- 常见命令：
+
+  + `npm install`
+  + `npm uninstall`
+  + `npm cache clean`
+  + `npm config set registry https://registry.npmmirror.com`：设置仓库地址，一般十分钟同步一次
+
+- `npx`： 通常情况下，npm操作都是全局的，如`webpack --version`查看的是全局版本，如果需要查看局部的，则需要使用`./node_modules/.bin/webpack --version`，此时可以使用npx调用局部的模块`npx webpack --version`
+
+- 发布Npm包：
+
+  + npm login
+  + npm publish
+  + 更新：修改版本号 -> npm publish
+  + npm unpublish
+  + npm deprecate(让发布的包过期)

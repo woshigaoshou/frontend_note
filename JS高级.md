@@ -584,3 +584,22 @@
    - `hasOwnProperty`：是否具有自己的属性，在原型上则返回false
    - `in`：在原型或自身上都返回true
    - `instanceof`：判断构造函数的`prototype`是否在实例的原型链上
+
+### 九、JSON
+
+1. `JSON.stringify`：
+   - value：需要转换的对象
+   - replacer：传入数组过滤，传入回调修改序列化之后的值
+   - space：空格缩进
+2. `JSON.parse`：
+   - text：需要转换的文本
+   - reviver：传入回调修改值
+3. `JSON.parse(JSON.stringify(obj))`： 深拷贝，但无法拷贝函数
+
+### 十、Storage
+
+|          | localStorage | sessionStorage |
+| -------- | ------------ | -------------- |
+| 存储时长     | 永久           | 当前会话关闭前        |
+| 不同窗口是否共享 | 是            | 否              |
+
