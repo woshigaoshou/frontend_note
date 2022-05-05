@@ -598,8 +598,11 @@
 
 ### 十、Storage
 
-|          | localStorage | sessionStorage |
-| -------- | ------------ | -------------- |
-| 存储时长     | 永久           | 当前会话关闭前        |
-| 不同窗口是否共享 | 是            | 否              |
+|          | localStorage                             | sessionStorage                           |
+| -------- | ---------------------------------------- | ---------------------------------------- |
+| 存储时长     | 永久                                       | 当前会话关闭前                                  |
+| 不同窗口是否共享 | 是                                        | 否                                        |
+| 方法       | getItem、setItem、key、length、removeItem、clear | getItem、setItem、key、length、removeItem、clear |
+| 大小限制     | 5MB~10MB                                 |                                          |
+|          |                                          |                                          |
 
