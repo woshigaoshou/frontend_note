@@ -56,3 +56,98 @@ function nilNew(fn) {
 }
 ```
 
+### 四、防抖节流
+
+```js
+/** 防抖 */
+// 1. 定时器版，非立即执行
+function debounce (fn, delay) {
+  let timer = null;
+  return function (...args) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      fn.apply(this, args);
+      clearTimeout(timer);
+      timer = null;
+    }, delay);
+  }
+}
+// 2. 定时器+时间戳版，立即执行
+function debounce (fn, delay) {
+  let last = Date.now();
+  let timer = null;
+  return function (...args) {
+    let now = Date.now();
+    if (timer) clearTimeout(timer);
+    if (now - last >= delay) {
+      fn.apply(this, args);
+    } else {
+      timer = setTimeout(() => {
+        fn.apply(this, args);
+        last = Date.now();
+        clearTimeout(timer);
+        timer = null;
+      }, delay);
+    }
+    last = now;
+  }
+}
+
+/** 节流 */
+// 1. 时间戳版，立即执行
+function throttle (fn, delay) {
+  let last = Date.now();
+  return function (...args) {
+    let now = Date.now();
+    if (now - last >= delay) {
+      fn.apply(this, args);
+      last = now;
+    }
+  }
+}
+
+// 2. 定时器版，非立即执行
+function throttle (fn, delay) {
+  let timer = null;
+  return function (...args) {
+    if (!timer) {
+      timer = setTimeout(() => {
+        fn.apply(this, args);
+        clearTimeout(timer);
+        timer = null;
+      }, delay);
+    }
+  }
+}
+```
+
+### 五、发布订阅（eventBus）
+
+```js
+class EventBus {
+  constructor () {
+    this.eventPool = new Map();
+  }
+  on (type, callback) {
+    if (!this.eventPool.has(type)) this.eventPool.set(type, []);
+    let callbacks = this.eventPool.get(type);
+    callbacks.push(callback);
+  }
+  cancelListen (type, callback) {
+    if (!this.eventPool.has(type)) return;
+    let callbacks = this.eventPool.get(type);
+    const index = callbacks.findIndex(cb => cb === callback);
+    callbacks.splice(index, 1);
+  }
+  emit (type, ...args) {
+    if (!this.eventPool.has(type)) return;
+    let callbacks = this.eventPool.get(type);
+    callbacks.forEach(cb => cb.apply(this, args));
+  }
+}
+```
+
+### 六、
+
+
+

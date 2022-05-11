@@ -45,7 +45,7 @@
 
 - 响应式原理：
 
-  ![响应式原理](E:\前端学习\frontend_note\图\响应式原理.jpg)
+  ![响应式原理](.\图\响应式原理.jpg)
 
   ```js
   let activeEffect = null;
@@ -163,7 +163,7 @@
 
 - `Promise`原理：
 
-  ![Promise](E:\前端学习\frontend_note\图\Promise.jpg)
+  ![Promise](.\图\Promise.jpg)
 
   ```js
   /** 手写Promise A+规范 */
@@ -414,7 +414,7 @@
 
   ### 三、迭代器和生成器（Iterator Generator）
 
-![iterator and  generator](E:\前端学习\frontend_note\图\iterator and  generator.jpg)
+![iterator and  generator](.\图\iterator and  generator.jpg)
 
 - 定义：迭代器(iterator)是一个具体的对象，需要符合迭代器协议，在JS中的体现是`next`方法
 
@@ -567,13 +567,13 @@
 
 - 事件循环规则：每次执行宏任务前，需要先清空微任务队列
 
-  ![EventLoop规则](E:\前端学习\frontend_note\图\EventLoop规则.jpg)
+  ![EventLoop规则](.\图\EventLoop规则.jpg)
 
 - 事件循环任务类型：
 
-  + 浏览器：
+  ![EventLoop](.\图\EventLoop.jpg)
 
-    ![EventLoop](E:\前端学习\frontend_note\图\EventLoop.jpg)
+  + 浏览器：
 
     * 事件队列类型：
       - `microtask queue`：Promise.then、queueMicrotask、Mutation Observer  
@@ -632,6 +632,7 @@
     const obj = require(./xxx);
 
     obj.name = 'John';	// 由于共享的是同一个对象，因此原文件的变量值也会被更改
+    ```
 
 
     /** 导出， 第二种，最终能导出的对象一定是module.exports指向的对象
@@ -640,7 +641,7 @@
      *	exports = module.exports;
      */
     exports.name = name;	// 导出的对象module.exports与exports是同一个
-
+    
     // 错误写法
     module.exports = {name: 'nil'};
     exports.age = 18;		// 该变量不会被导出
@@ -662,8 +663,8 @@
     //      - 查找X/index.node
     //   4) 若查找不到，则报not found
     // 3. x既不是核心模块，也没有路径，此时会从当前目录开始逐级往上查找每个路径上的node_modules里是否有匹配的包
-
-    ```
+    
+    ​```
 
   + require查找规则：
 
@@ -708,7 +709,6 @@
      *	5. 最终回到main.js，打印'我是main文件'
      */
 
-
     // a.js
     const getMes = require('./b')
     console.log('我是 a 文件')
@@ -735,7 +735,6 @@
     console.log('node 入口文件')
     ```
 
-    ​
 
 - `ES Module`：
 
@@ -796,7 +795,6 @@
      *	6. 执行main.js文件
      */
 
-
     // main.js
     console.log('main.js开始执行')
     import say from './a'
@@ -816,6 +814,7 @@
         console.log('hello,world')
     }
     ```
+
 
   + `ESModule`一些细节：
 
