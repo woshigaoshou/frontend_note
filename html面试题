@@ -1,0 +1,52 @@
+##### 1. 如何理解HTML语义化
+
+- 常见语义化标签：`header`、`nav`、`aside`、`footer`、`section`、`main`等;
+
+
+   - 代码的可读性更强；便于开发和维护
+   - 有利于SEO搜索（提升搜索引擎的排名）
+
+##### 2. 哪些标签是块级元素，哪些是内联元素
+
+- 块级元素：display: block/table; 常见的有`h1~h6`、`p`、`ul`、`li`、`table`、`div`等
+- 内联元素：display: inline/inline-block; 常见的有 `span`、`input`、`img`、`button`等
+
+##### 3. `href` 和 `src`的区别：
+
+- href：
+  - 用于`a` 和 `link` 标签；
+  - 使用时不会影响到页面其他资源的加载；
+  - 不会替换本身的内容
+  - 代表标签是网站的附属资源，没有并不造成逻辑的影响（因此css用link标签引入）
+- src：
+  - 用于`img` 、 `video` 、`script` 、`iframe` 标签；
+  - 使用时会暂停页面其他资源的加载，直到该资源加载、编译和执行完；(因此一般放在脚本底部)
+  - 会替换本身的内容，如script本身的内容不会被执行
+  - 代表标签本身是网站的一部分
+
+##### 4. DOCTYPE(文档类型)的作用
+
+DOCTYPE是HTML5标准通用标记语言的文档类型声明，作用是告诉浏览器以哪种 **文档类型定义(DTD)** 来解析页面，通过 `document.compatMode` 来查看模式，最常见的影响是在ie6、ie7、ie8下怪异模型的盒模型为怪异盒模型(`box-sizing: border-box`)
+
+- CSS1Compat：标准模式(Strick mode)，默认使用W3C的标准解析渲染页面
+- BackCompat：怪异模式/混杂模式(Quick mode)，使用浏览器自己的怪异模式解析渲染页面
+
+##### 5. script 标签中 defer 和 async 的区别
+
+当解析HTML标签遇到script时，浏览器会停止解析，开始下载，执行该脚本，直至执行完成，才继续解析HTML
+
+- async：当script标签具有async属性时，会先并行下载脚本，等待下载完成后，停止解析HTML，先执行脚本，再进行解析
+- defer：当script标签具有defer属性时，会暂时忽略该标签，等HTML解析完成后，再进行脚本的下载和解析
+- 当两个属性都存在时，async优先级更高
+
+##### 6.
+
+
+
+
+
+
+
+
+
+
