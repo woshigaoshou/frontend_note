@@ -37,9 +37,12 @@
 
 ##### 4. link和@import的区别
 
-- link标签能链接css外的其他资源，@import只能引入css样式
+- link标签能定义rel等属性(`prefetch`,`preload`)，@import只能引入css样式
 - link标签无兼容性问题，@import是css2.1提出的
-- link标签是同步下载的，而@import需要页面加载完成以后
+- link标签是同时下载的，而@import需要读取完整个HTML文件后才进行下载
+- link标签可通过DOM操作插入，@import不支持
+
+##### 5. 
 
 ##### 1. offsetWidth，clientWidth和scrollWidth的区别等
 
