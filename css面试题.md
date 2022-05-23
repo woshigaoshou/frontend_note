@@ -44,8 +44,6 @@
 - link标签是同时下载的，而@import需要读取完整个HTML文件后才进行下载
 - link标签可通过DOM操作插入，@import不支持
 
-##### 5. 
-
 ##### 5. display:none 与 visibility:hidden 的区别
 
 - `display:none` 会让元素从渲染树中消失，`visibility:hidden` 的元素仍会占据原来的位置
@@ -98,32 +96,13 @@ p:hover {
 
   2) border-box：width + scrollbar.width + padding + border
 
-##### 10. margin纵向重叠问题
-
-```js
-// 1. 空白的内容会被忽略
-// 2. 纵向margin会合并，取较大的值
-// 最终答案为15px
-<style>
-  p {
-    margin-top: 10px;
-    margin-bottom: 15;
-  }
-</style>
-
-<body>
-  <p>1</p>
-  <p></p>
-  <p>2</p>
-</body>
-```
-##### 11. margin负值的问题
+##### 10. margin负值的问题
 
 - `margin-left ` 和 `margin-top`：自身向左或上移动距离
 - `margin-right` 和 `margin-bottom`：自身不变，右侧/下方元素移动距离
 - 应用：不确定多少列的布局，给父元素`margin-right: -N px`，外层容器使用`overflow: hidden`
 
-##### 12. CSS3的新特性
+##### 11. CSS3的新特性
 
 - 文字阴影：`text-shadow`
 - 渐变：`gradient`
@@ -131,7 +110,7 @@ p:hover {
 - 圆角：`border-radius`
 - 新的选择器：`:not:classname`
 
-##### 13. 什么是物理像素，逻辑像素和像素密度，为什么在移动端开发时需要用到@3x, @2x 这种图片？
+##### 12. 什么是物理像素，逻辑像素和像素密度，为什么在移动端开发时需要用到@3x, @2x 这种图片？
 
 以 iPhone XS 为例，当写 CSS 代码时，针对于单位 px，其宽度为 414px * 896px，也就是说当赋予一个 DIV 元素宽度为 414px，这个 DIV 就会填满手机的宽度；
 
@@ -139,7 +118,7 @@ p:hover {
 
 对于图片来说，为了保证其不失真，1 个图片像素至少要对应一个物理像素，假如原始图片是 500 * 300 像素，那么在 3 倍屏上就要放一个 1500 * 900 像素的图片才能保证 1 个物理像素至少对应一个图片像素，才能不失真。
 
-##### 14. 对**line-height 的理解及其赋值方式**
+##### 13. 对**line-height 的理解及其赋值方式**
 
 (1) 概念：
 
@@ -152,7 +131,7 @@ p:hover {
 - 纯数字：如1.5，子元素`font-size: 18px`，则行高为27px
 - 百分比：将计算后的值传递给后代
 
-##### 15. CSS 优化和提高性能的方法有哪些？
+##### 14. CSS 优化和提高性能的方法有哪些？
 
 - css压缩：将写好的css文件进行压缩，减少体积
 - 样式单一：`margin: 0 10px 0 12px;`的性能不如`margin-right: 10px; margin-left: 12px;`
@@ -160,13 +139,13 @@ p:hover {
 - 避免回流和重绘
 - 雪碧图
 
-##### 16. Sass、Less 是什么？为什么要使用他们？
+##### 15. Sass、Less 是什么？为什么要使用他们？
 
 - 语法结构清晰，便于后期维护
 - 可定义变量，更加直观
 - 可以方便地屏蔽浏览器私有语法差异
 
-##### 17. 单行、多行文本溢出隐藏
+##### 16. 单行、多行文本溢出隐藏
 
 ```css
 // 单行
@@ -182,11 +161,11 @@ display: -webkit-box;
 -webkit-line-clamp: 3;
 ```
 
-##### 18. 对媒体查询的理解？
+##### 17. 对媒体查询的理解？
 
 媒体查询由⼀个可选的媒体类型和零个或多个使⽤媒体功能的限制了样式表范围的表达式组成，例如宽度、⾼度和颜⾊。媒体查询，添加⾃ CSS3，允许内容的呈现针对⼀个特定范围的输出设备⽽进⾏裁剪，⽽不必改变内容本身，适合 web ⽹⻚应对不同型号的设备⽽做出对应的响应适配。
 
-##### 19. 如何判断元素是否达到可视区域
+##### 18. 如何判断元素是否达到可视区域
 
 以图片显示为例：
 
@@ -197,7 +176,7 @@ display: -webkit-box;
 
 ![判断可视区域](.\图\判断可视区域.png)
 
-##### 20.  z-index 属性在什么情况下会失效，层叠上下文是什么
+##### 19.  z-index 属性在什么情况下会失效，层叠上下文是什么
 
 > 层叠上下文是一个逻辑模型，一个概念，我们可以通过各种方式来实现这个模型，就好比我们可以用 `JS` 来实现链表一样。该模型有一些特点，比如它把我们的某一块（比如 `div`）构建成一个三维模型，处于该三维模型中的元素就会有层叠顺序，即 `z` 轴的层级。
 
@@ -530,32 +509,158 @@ vw/vh 和百分比很类似，两者的区别：百分比（%）：大部分相
 
 ##### 1. 为什么需要清除浮动？清除浮动的方式
 
+**浮动的定义：** 非 IE 浏览器下，容器不设高度且子元素浮动时，容器高度不能被内容撑开。 此时，内容会溢出到容器外面而影响布局。这种现象被称为浮动（溢出）。
+
+**浮动的工作原理：**
+
+- 浮动元素脱离文档流，不占据空间（引起“高度塌陷”现象）
+- 浮动元素碰到包含它的边框或者其他浮动元素的边框停留
+
+**清除浮动的方式：**(clear属性只有块级元素才有效)
+
+```css
+.clear::after{
+  content:'';
+  display: block;
+  clear:both;
+}
+```
+
+##### 2. BFC（block format context）的理解和应用
+
+**定义：**一块独立渲染的区域，内部的渲染不会影响到外部的元素
+
+**形成的条件：**
+
+- float不为none
+- display为flex或table
+- position为absolute或fixed
+- overflow不为visible
+
+**BFC 的作用：**
+
+- **解决 margin 的重叠问题**：由于 BFC 是一个独立的区域，内部的元素和外部的元素互不影响，将两个元素变为两个 BFC，就解决了 margin 重叠的问题。
+- **解决高度塌陷的问题**：在对子元素设置浮动后，父元素会发生高度塌陷，也就是父元素的高度变为 0。解决这个问题，只需要把父元素变成一个 BFC。常用的办法是给父元素设置`overflow:hidden`。
+
+##### 3.什么是 margin 重叠问题？如何解决？
+
+**问题描述：**
+
+两个块级元素的上外边距和下外边距可能会合并（折叠）为一个外边距，其大小会取其中外边距值大的那个，这种行为就是外边距折叠。需要注意的是，**浮动的元素和绝对定位**这种脱离文档流的元素的外边距不会折叠。重叠只会出现在**垂直方向**。
+
+**计算原则：**
+
+折叠合并后外边距的计算原则如下：
+
+- 如果两者都是正数，那么就去最大者
+- 如果是一正一负，就会正值减去负值的绝对值
+- 两个都是负值时，用 0 减去两个中绝对值大的那个
+
+**解决办法：**
+
+对于折叠的情况，主要有两种：**兄弟之间重叠**和**父子之间重叠**
+
+（1）兄弟之间重叠：
+
+- 底部盒子设置为: `display: inline-block`
+
+（2）父子之间重叠：
+
+- 设置父盒子为`BFC`
+
+### 四、场景应用
+
+##### 1. 实现一个三角形
+
+```css
+.box {
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top: 10px solid red;
+}
+
+.box {
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top: 10px solid red;
+  border-left: 10px solid red;
+}
+```
+
+##### 2. 实现一个扇形 
+
+```css
+.box {
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top: 10px solid red;
+  border-radius: 10px;
+}
+```
+
+##### 3. 实现一个宽高自适应的正方形
+
+```css
+// 利用padding,margin百分比以父盒子宽度为准
+.square {
+  width: 20%;
+  padding-top: 20%;
+  background-color: red;
+}
+
+.square {
+  width: 10vw;
+  height: 10vw;
+  background: red;
+}
+```
+
+##### 4. 画一条 0.5px 的线
+
+- 使用 `transform: scale`
+
+  ```css
+  transform: scale(0.5, 0.5);
+  ```
+
+- 使用 `meta` 标签 （针对移动端）
+
+  ```html
+  <meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.5, maximum-scale=0.5"></meta>
+  ```
+
+##### 5. 如何解决 1px 问题？
+
+伪元素先放大后缩小
+这个方法的可行性会更高，兼容性也更好。唯一的缺点是代码会变多。
+
+思路是先放大、后缩小：**在目标元素的后面追加一个 ::after 伪元素，让这个元素布局为 absolute 之后、整个伸展开铺在目标元素上，然后把它的**宽和高都设置为目标元素的两倍，border 值设为 1px。**接着借助 CSS 动画特效中的放缩能力，把整个伪元素缩小为原来的 50%。此时，伪元素的宽高刚好可以和原有的目标元素对齐，而 border 也缩小为了 1px 的二分之一**，间接地实现了 0.5px 的效果。
+
+```css
+/** 代码如下： */
+
+#container[data-device="2"] {
+    position: relative;
+}
+#container[data-device="2"]::after{
+      position:absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      content:"";
+      transform: scale(0.5);
+      transform-origin: left top;
+      box-sizing: border-box;
+      border: 1px solid #333;
+    }
+}
+```
 
 
-##### 12. BFC（block format context）的理解和应用
-
-- 定义：一块独立渲染的区域，内部的渲染不会影响到外部的元素
-- 形成的条件：
-  - float不为none
-  - display为flex或table
-  - position为absolute或fixed
-  - overflow不为visible
-- 应用场景：清除浮动
 
 
 
-1. float布局的问题，以及clearfix
-
-2. flex布局
-
-3. 绝对定位和相对定位
-
-4. 居中对齐的方式
-
-5. line-height的继承问题
-
-6. rem是什么
-
-7. 如何实现响应式
-
-8. css3动画
