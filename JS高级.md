@@ -563,7 +563,7 @@
 
 |          | localStorage                             | sessionStorage                           | Cookie                                   | IndexDB |
 | -------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- | ------- |
-| 存储时长     | 永久                                       | 当前会话关闭前                                  | 内存cookie：未设置过期时间，关闭浏览器自动删除；硬盘cookie：需过期或手动清除 | 永久      |
+| 存储时长     | 永久                                       | 当前会话关闭前                                  | 内存cookie：未设置过期时间，关闭浏览器自动删除；硬盘cookie：需过期或手动清除，常见字段：key、value、domain、max-age和http-only | 永久      |
 | 不同窗口是否共享 | 是（同源）                                    | 否（同源）                                    | 是（同源），需要设置domain                         | 是（同源）   |
 | 方法       | getItem、setItem、key、length、removeItem、clear | getItem、setItem、key、length、removeItem、clear | document.cookie                          | 多个API   |
 | 大小限制     | 5MB~10MB                                 | 5MB~10MB                                 | 4k(单个键值对)                                | 250MB   |
