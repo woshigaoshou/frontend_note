@@ -1,4 +1,4 @@
-### 一、 数据类型
+## 一、 数据类型
 
 ##### 1. JavaScript有几种数据类型，它们的区别？
 
@@ -313,7 +313,7 @@ b.toString() // "[object Object]"
 a + b // "[object Object][object Object]"
 ```
 
-### 二、ES6
+## 二、ES6
 
 ##### 1. let、const、var的区别
 
@@ -817,7 +817,113 @@ const repeated = sourceCode.repeat(3)
 console.log(repeated) // repeat for 3 times;repeat for 3 times;repeat for 3 times;
 ```
 
-### 三、JavaScript基础
+## 三、JavaScript基础
 
 ##### 1. JavaScript有哪些内置对象 
+
+
+
+##### 2. JavaScript脚本延迟加载的方式有哪些？
+
+
+
+##### 3. JavaScript 类数组对象的定义？
+
+
+
+##### 4. 数组有哪些原生方法？
+
+
+
+##### 5. 数组的遍历方法有哪些
+
+
+
+##### 6. forEach和map方法有什么区别
+
+
+
+##### 7. 为什么函数的 arguments 参数是类数组而不是数组？如何遍历类数组?
+
+
+
+##### 8. 对类数组对象的理解，如何转化为数组
+
+
+
+
+
+##### 9. 什么是 DOM 和 BOM？
+
+
+
+##### 10.  对AJAX的理解，实现一个AJAX请求
+
+
+
+##### 11. JavaScript为什么要进行变量提升，它导致了什么问题？
+
+
+
+##### 12. 什么是尾调用，使用尾调用有什么好处？
+
+
+
+##### 13. **ES6**模块与**CommonJS**模块有什么异同？
+
+
+
+##### 14. 常见的DOM操作有哪些
+
+
+
+##### 15. use strict是什么意思 ? 使用它区别是什么？ 
+
+
+
+##### 16. 如何判断一个对象是否属于某个类？
+
+
+
+##### 17. for...in和for...of的区别
+
+
+
+##### 18. 如何使用for...of遍历对象
+
+
+
+##### 19. ajax、axios、fetch的区别
+
+
+
+## 四、 原型与原型链
+
+
+
+
+
+## 五、 执行上下文/作用域链/闭包
+
+
+
+
+
+## 六、 this/call/apply/bind
+
+
+
+## 七、异步编程
+
+
+
+## 八、面向对象
+
+
+
+## 九、 垃圾回收与内存泄漏
+
+
+
+
 
