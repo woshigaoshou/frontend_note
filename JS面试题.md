@@ -181,8 +181,8 @@ NaN 是一个特殊值，它和自身不相等，是唯一一个非自反（自�
 
 || 和 && 首先会对第一个操作数执行条件判断，如果其不是布尔值就先强制转换为布尔类型，然后再执行条件判断。
 
-- 对于 || 来说，如果条件判断结果为 true 就返回第一个操作数的值，如果为 false 就返回第二个操作数的值。
-- && 则相反，如果条件判断结果为 true 就返回第二个操作数的值，如果为 false 就返回第一个操作数的值。
+- 对于 || 来说，如果第一个条件判断结果为 true 就返回第一个操作数的值，如果为 false 就返回第二个操作数的值。
+- && 则相反，如果第一个条件判断结果为 true 就返回第二个操作数的值，如果为 false 就返回第一个操作数的值。
 
 || 和 && 返回它们其中一个操作数的值，而非条件判断的结果
 
@@ -373,7 +373,7 @@ new 操作符的实现步骤如下：
 - 如果函数体的返回值只有一句，可以省略大括号
 - 如果函数体不需要返回值，且只有一句话，可以给这个语句前面加一个void关键字。最常见的就是调用一个函数：
 
-```
+```js
 let fn = () => void doesNotReturn();
 ```
 
@@ -383,7 +383,7 @@ let fn = () => void doesNotReturn();
 
 **（3）箭头函数继承来的this指向永远不会改变**
 
-```
+```js
 var id = 'GLOBAL';
 var obj = {
   id: 'OBJ',
@@ -404,7 +404,7 @@ new obj.b()  // Uncaught TypeError: obj.b is not a constructor
 
 **（4）call()、apply()、bind()等方法不能改变箭头函数中this的指向**
 
-```
+```js
 var id = 'Global';
 let fun1 = () => {
     console.log(this.id)
@@ -572,4 +572,252 @@ Math.max(...numbers); // 9
 ```
 
 ##### 7. Proxy 可以实现什么功能？
+
+在 Vue3.0 中通过 `Proxy` 来替换原本的 `Object.defineProperty` 来实现数据响应式。
+
+Proxy 是 ES6 中新增的功能，它可以用来自定义对象中的操作。
+
+```js
+let p = new Proxy(target, handler)
+```
+
+`target` 代表需要添加代理的对象，`handler` 用来自定义对象中的操作，比如可以用来自定义 `set` 或者 `get` 函数。
+
+下面来通过 `Proxy` 来实现一个数据响应式：
+
+```js
+let onWatch = (obj, setBind, getLogger) => {
+  let handler = {
+    get(target, property, receiver) {
+      getLogger(target, property)
+      return Reflect.get(target, property, receiver)
+    },
+    set(target, property, value, receiver) {
+      setBind(value, property)
+      return Reflect.set(target, property, value)
+    }
+  }
+  return new Proxy(obj, handler)
+}
+let obj = { a: 1 }
+let p = onWatch(
+  obj,
+  (v, property) => {
+    console.log(`监听到属性${property}改变为${v}`)
+  },
+  (target, property) => {
+    console.log(`'${property}' = ${target[property]}`)
+  }
+)
+p.a = 2 // 监听到属性a改变
+p.a // 'a' = 2
+```
+
+在上述代码中，通过自定义 `set` 和 `get` 函数的方式，在原本的逻辑中插入了我们的函数逻辑，实现了在对对象任何属性进行读写时发出通知。
+
+当然这是简单版的响应式实现，如果需要实现一个 Vue 中的响应式，需要在 `get` 中收集依赖，在 `set` 派发更新，之所以 Vue3.0 要使用 `Proxy` 替换原本的 API 原因在于 `Proxy` 无需一层层递归为每个属性添加代理，一次即可完成以上操作，性能上更好，并且原本的实现有一些数据更新不能监听到，但是 `Proxy` 可以完美监听到任何方式的数据改变，唯一缺陷就是浏览器的兼容性不好。
+
+##### 8. 对对象与数组的解构的理解
+
+解构是 ES6 提供的一种新的提取数据的模式，这种模式能够从对象或数组里有针对性地拿到想要的数值。
+
+**1）数组的解构**
+
+在解构数组时，以元素的位置为匹配条件来提取想要的数据的：
+
+```js
+const [a, b, c] = [1, 2, 3]
+```
+
+最终，a、b、c分别被赋予了数组第0、1、2个索引位的值：
+
+![解构1](.\图\解构1.jpg)
+
+数组里的0、1、2索引位的元素值，精准地被映射到了左侧的第0、1、2个变量里去，这就是数组解构的工作模式。还可以通过给左侧变量数组设置空占位的方式，实现对数组中某几个元素的精准提取：
+
+```js
+const [a,,c] = [1,2,3]
+```
+
+通过把中间位留空，可以顺利地把数组第一位和最后一位的值赋给 a、c 两个变量：
+
+![image](.\图\解构2.jpg)
+
+**2）对象的解构**
+
+对象解构比数组结构稍微复杂一些，也更显强大。在解构对象时，是以属性的名称为匹配条件，来提取想要的数据的。现在定义一个对象：
+
+```js
+const stu = {
+  name: 'Bob',
+  age: 24
+}
+```
+
+假如想要解构它的两个自有属性，可以这样：
+
+```js
+const { name, age } = stu
+```
+
+这样就得到了 name 和 age 两个和 stu 平级的变量：
+
+![解构3](.\图\解构3.jpg)
+
+注意，对象解构严格以属性名作为定位依据，所以就算调换了 name 和 age 的位置，结果也是一样的：
+
+```js
+const { age, name } = stu
+```
+
+##### 9.**如何提取高度嵌套的对象里的指定属性？**
+
+有时会遇到一些嵌套程度非常深的对象：
+
+```js
+const school = {
+   classes: {
+      stu: {
+         name: 'Bob',
+         age: 24,
+      }
+   }
+}
+```
+
+像此处的 name 这个变量，嵌套了四层，此时如果仍然尝试老方法来提取它：
+
+```js
+const { name } = school
+```
+
+显然是不奏效的，因为 school 这个对象本身是没有 name 这个属性的，name 位于 school 对象的“儿子的儿子”对象里面。要想把 name 提取出来，一种比较笨的方法是逐层解构：
+
+```json
+const { classes } = school
+const { stu } = classes
+const { name } = stu
+name // 'Bob'
+```
+
+但是还有一种更标准的做法，可以用一行代码来解决这个问题：
+
+```js
+const { classes: { stu: { name } }} = school
+       
+console.log(name)  // 'Bob'
+```
+
+可以在解构出来的变量名右侧，通过冒号+{目标属性名}这种形式，进一步解构它，一直解构到拿到目标数据为止。
+
+##### 10.对 rest 参数的理解（函数：剩余参数，数组和对象：扩展运算符）
+
+扩展运算符被用在函数形参上时，**它还可以把一个分离的参数序列整合成一个数组**：
+
+```js
+function mutiple(...args) {
+  let result = 1;
+  for (var val of args) {
+    result *= val;
+  }
+  return result;
+}
+mutiple(1, 2, 3, 4) // 24
+```
+
+这里，传入 mutiple 的是四个分离的参数，但是如果在 mutiple 函数里尝试输出 args 的值，会发现它是一个数组：
+
+```js
+function mutiple(...args) {
+  console.log(args)
+}
+mutiple(1, 2, 3, 4) // [1, 2, 3, 4]
+```
+
+这就是 … rest运算符的又一层威力了，它可以把函数的多个入参收敛进一个数组里。这一点**经常用于获取函数的多余参数，或者像上面这样处理函数参数个数不确定的情况。**
+
+##### 11. ES6中模板语法与字符串处理
+
+ES6 提出了“模板语法”的概念。在 ES6 以前，拼接字符串是很麻烦的事情：
+
+```js
+var name = 'css'   
+var career = 'coder' 
+var hobby = ['coding', 'writing']
+var finalString = 'my name is ' + name + ', I work as a ' + career + ', I love ' + hobby[0] + ' and ' + hobby[1]
+```
+
+仅仅几个变量，写了这么多加号，还要时刻小心里面的空格和标点符号有没有跟错地方。但是有了模板字符串，拼接难度直线下降：
+
+```jsx
+var name = 'css'   
+var career = 'coder' 
+var hobby = ['coding', 'writing']
+var finalString = `my name is ${name}, I work as a ${career} I love ${hobby[0]} and ${hobby[1]}`
+```
+
+字符串不仅更容易拼了，也更易读了，代码整体的质量都变高了。这就是模板字符串的第一个优势——允许用${}的方式嵌入变量。但这还不是问题的关键，模板字符串的关键优势有两个：
+
+- 在模板字符串中，空格、缩进、换行都会被保留
+- 模板字符串完全支持“运算”式的表达式，可以在${}里完成一些计算
+
+基于第一点，可以在模板字符串里无障碍地直接写 html 代码：
+
+```jsx
+let list = `
+    <ul>
+        <li>列表项1</li>
+        <li>列表项2</li>
+    </ul>
+`;
+console.log(message); // 正确输出，不存在报错
+```
+
+基于第二点，可以把一些简单的计算和调用丢进 ${} 来做：
+
+```js
+function add(a, b) {
+  const finalString = `${a} + ${b} = ${a+b}`
+  console.log(finalString)
+}
+add(1, 2) // 输出 '1 + 2 = 3'
+```
+
+除了模板语法外， ES6中还新增了一系列的字符串方法用于提升开发效率：
+
+- **存在性判定**：在过去，当判断一个字符/字符串是否在某字符串中时，只能用 indexOf > -1 来做。现在 ES6 提供了三个方法：includes、startsWith、endsWith，它们都会返回一个布尔值来告诉你是否存在。
+- - **includes**：判断字符串与子串的包含关系：
+
+```js
+const son = 'haha' 
+const father = 'xixi haha hehe'
+father.includes(son) // true
+```
+
+- - **startsWith**：判断字符串是否以某个/某串字符开头：
+
+```js
+const father = 'xixi haha hehe'
+father.startsWith('haha') // false
+father.startsWith('xixi') // true
+```
+
+- - **endsWith**：判断字符串是否以某个/某串字符结尾：
+
+```js
+const father = 'xixi haha hehe'
+father.endsWith('hehe') // true
+```
+
+- **自动重复**：可以使用 repeat 方法来使同一个字符串输出多次（被连续复制多次）：
+
+```js
+const sourceCode = 'repeat for 3 times;'
+const repeated = sourceCode.repeat(3) 
+console.log(repeated) // repeat for 3 times;repeat for 3 times;repeat for 3 times;
+```
+
+### 三、JavaScript基础
+
+##### 1. JavaScript有哪些内置对象 
 
