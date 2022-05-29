@@ -616,24 +616,20 @@
 ### 六、模块化开发
 
 - 模块化开发：将程序划分为多个小结构
+- `CommonJS`：适用于服务器，但由于引入加载都是同步的，因此在浏览器无法使用
 
-- `CommonJS`：适用于服务器，但由于引入加载都是同步的，因此在浏览器
+```js
+/** 导出， 第一种 */
+module.exports = {};
+// 或单独变量导出，本质上exports是一个对象
+const name = 'nil';
+module.exports.name = name;
 
-  + 语法规则：
+/** 导入 */
+const obj = require(./xxx);
 
-    ```js
-    /** 导出， 第一种 */
-    module.exports = {};
-    // 或单独变量导出，本质上exports是一个对象
-    const name = 'nil';
-    module.exports.name = name;
-
-    /** 导入 */
-    const obj = require(./xxx);
-
-    obj.name = 'John';	// 由于共享的是同一个对象，因此原文件的变量值也会被更改
-    ```
-
+obj.name = 'John';	// 由于共享的是同一个对象，因此原文件的变量值也会被更改
+```
 
     /** 导出， 第二种，最终能导出的对象一定是module.exports指向的对象
      *	源码内部实现逻辑为：
@@ -663,8 +659,6 @@
     //      - 查找X/index.node
     //   4) 若查找不到，则报not found
     // 3. x既不是核心模块，也没有路径，此时会从当前目录开始逐级往上查找每个路径上的node_modules里是否有匹配的包
-    
-    ​```
 
   + require查找规则：
 

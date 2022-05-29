@@ -819,83 +819,305 @@ console.log(repeated) // repeat for 3 times;repeat for 3 times;repeat for 3 time
 
 ## 三、JavaScript基础
 
-##### 1. JavaScript有哪些内置对象 
+##### 1. JavaScript脚本延迟加载的方式有哪些？
 
+延迟加载就是等页面加载完成之后再加载 JavaScript 文件。 js 延迟加载有助于提高页面加载速度。
 
+一般有以下几种方式：
 
-##### 2. JavaScript脚本延迟加载的方式有哪些？
+- **defer 属性：**给 js 脚本添加 defer 属性，这个属性会让脚本的加载与文档的解析同时进行，然后在文档解析完成后再执行这个脚本文件，这样的话就能使页面的渲染不被阻塞。多个设置了 defer 属性的脚本按规范来说最后是顺序执行的，但是在一些浏览器中可能不是这样。
+- **async 属性：**给 js 脚本添加 async 属性，这个属性会使脚本异步加载，不会阻塞页面的解析过程，但是当脚本加载完成后立即执行 js 脚本，这个时候如果文档没有解析完成的话同样会阻塞。多个 async 属性的脚本的执行顺序是不可预测的，一般不会按照代码的顺序依次执行。
+- **动态创建 DOM 方式：**动态创建 DOM 标签的方式，可以对文档的加载事件进行监听，当文档加载完成后再动态的创建 script 标签来引入 js 脚本。
+- **使用 setTimeout 延迟方法：**设置一个定时器来延迟加载js脚本文件
+- **让 JS 最后加载：**将 js 脚本放在文档的底部，来使 js 脚本尽可能的在最后来加载执行。
 
+##### 2. JavaScript 类数组对象的定义？
 
+一个拥有 length 属性和若干索引属性的对象就可以被称为类数组对象，类数组对象和数组类似，但是不能调用数组的方法。常见的类数组对象有 arguments 和 DOM 方法的返回结果，还有一个函数也可以被看作是类数组对象，因为它含有 length 属性值，代表可接收的参数个数。
 
-##### 3. JavaScript 类数组对象的定义？
+常见的类数组转换为数组的方法有这样几种：
 
+（1）通过 call 调用数组的 slice 方法来实现转换
 
+```js
+Array.prototype.slice.call(arrayLike);
+```
 
-##### 4. 数组有哪些原生方法？
+（2）通过 call 调用数组的 splice 方法来实现转换
 
+```js
+Array.prototype.splice.call(arrayLike, 0);
+```
 
+（3）通过 apply 调用数组的 concat 方法来实现转换
 
-##### 5. 数组的遍历方法有哪些
+```js
+Array.prototype.concat.apply([], arrayLike);
+```
 
+（4）通过 Array.from 方法来实现转换
 
+```js
+Array.from(arrayLike);
+```
 
-##### 6. forEach和map方法有什么区别
+##### 3. 数组有哪些原生方法？
 
+- 数组和字符串的转换方法：toString()、toLocalString()、join() 其中 join() 方法可以指定转换为字符串时的分隔符。
+- 数组尾部操作的方法 pop() 和 push()，push 方法可以传入多个参数。
+- 数组首部操作的方法 shift() 和 unshift() 重排序的方法 reverse() 和 sort()，sort() 方法可以传入一个函数来进行比较，传入前后两个值，如果返回值为正数，则交换两个参数的位置。
+- 数组连接的方法 concat() ，返回的是拼接好的数组，不影响原数组。
+- 数组截取办法 slice()，用于截取数组中的一部分返回，不影响原数组。
+- 数组插入方法 splice()，影响原数组查找特定项的索引的方法，indexOf() 和 lastIndexOf() 迭代方法 every()、some()、filter()、map() 和 forEach() 方法
+- 数组归并方法 reduce() 和 reduceRight() 方法
 
+##### 4. 数组的遍历方法有哪些
 
-##### 7. 为什么函数的 arguments 参数是类数组而不是数组？如何遍历类数组?
+| **方法**                   | **是否改变原数组** | **特点**                                   |
+| ------------------------ | ----------- | ---------------------------------------- |
+| forEach()                | 取决于元素的数据类型  | 数组方法，没有返回值，是否会改变原数组取决于数组元素的类型是基本类型还是引用类型，详细解释可参考文章：[《forEach到底可以改变原数组吗》](https://blog.csdn.net/weixin_44628533/article/details/102495129) |
+| map()                    | 否           | 数组方法，不改变原数组，有返回值，可链式调用                   |
+| filter()                 | 否           | 数组方法，过滤数组，返回包含符合条件的元素的数组，可链式调用           |
+| for...of                 | 否           | for...of遍历具有Iterator迭代器的对象的属性，返回的是数组的元素、对象的属性值，不能遍历普通的obj对象，将异步循环变成同步循环 |
+| every() 和 some()         | 否           | 数组方法，some()只要有一个是true，便返回true；而every()只要有一个是false，便返回false. |
+| find() 和 findIndex()     | 否           | 数组方法，find()返回的是第一个符合条件的值；findIndex()返回的是第一个返回条件的值的索引值 |
+| reduce() 和 reduceRight() | 否           | 数组方法，reduce()对数组正序操作；reduceRight()对数组逆序操作 |
 
+##### 5.对类数组的理解？如何遍历类数组?
 
+`arguments`是一个对象，它的属性是从 0 开始依次递增的数字，还有`callee`和`length`等属性，与数组相似；但是它却没有数组常见的方法属性，如`forEach`, `reduce`等，所以叫它们类数组。
 
-##### 8. 对类数组对象的理解，如何转化为数组
+要遍历类数组，有三个方法：
 
+（1）将数组的方法应用到类数组上，这时候就可以使用`call`和`apply`方法，如：
 
+```js
+function foo(){ 
+  Array.prototype.forEach.call(arguments, a => console.log(a))
+}
+```
 
+（2）使用Array.from方法将类数组转化成数组：‌
 
+```js
+function foo(){ 
+  const arrArgs = Array.from(arguments) 
+  arrArgs.forEach(a => console.log(a))
+}
+```
 
-##### 9. 什么是 DOM 和 BOM？
+（3）使用展开运算符将类数组转化成数组
 
+```js
+function foo(){ 
+    const arrArgs = [...arguments] 
+    arrArgs.forEach(a => console.log(a)) 
+}
+```
 
+##### 6. 什么是 DOM 和 BOM？（JavaScript由ECMAScript(标准)、DOM(document object model)和BOM(brower object model)组成）
 
-##### 10.  对AJAX的理解，实现一个AJAX请求
+![DOM和BOM](.\图\DOM和BOM.jpg)
 
+- DOM 指的是文档对象模型，它指的是把文档当做一个对象，这个对象主要定义了处理网页内容的方法和接口。
+- BOM 指的是浏览器对象模型，它指的是把浏览器当做一个对象来对待，这个对象主要定义了与浏览器进行交互的法和接口。BOM的核心是 window，而 window 对象具有双重角色，它既是通过 js 访问浏览器窗口的一个接口，又是一个 Global（全局）对象。这意味着在网页中定义的任何对象，变量和函数，都作为全局对象的一个属性或者方法存在。window 对象含有 location 对象、navigator 对象、screen 对象等子对象，并且 DOM 的最根本的对象 document 对象也是 BOM 的 window 对象的子对象。
 
+##### 7.  对AJAX的理解，实现一个AJAX请求
 
-##### 11. JavaScript为什么要进行变量提升，它导致了什么问题？
+AJAX请求有五个状态，分别是：
 
+0：请求未初始化（还没有调用 open()）。
 
+1：请求已经建立，但是还没有发送（还没有调用 send()）。
 
-##### 12. 什么是尾调用，使用尾调用有什么好处？
+2：请求已发送，正在处理中（通常现在可以从响应中获取内容头）。
 
+3：请求在处理中；通常响应中已有部分数据可用了，但是服务器还没有完成响应的生成。
 
+4：响应已完成；您可以获取并使用服务器的响应了。
 
-##### 13. **ES6**模块与**CommonJS**模块有什么异同？
+```js
+function createAjax (url) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);	// 是否异步
+    xhr.onreadystatechange = function () {
+      if (this.readyState !== 4) return;
+      if (this.status === 200) {
+        resolve(this.response);
+      } else {
+        reject(new Error(this.statusText));
+      }
+    }
+    xhr.onerror = function () {
+      reject(new Error(this.statusText));
+    }
+    xhr.sendRequestHeader('Accept', 'application/json');
+    xhr.send(null);
+  })
+}
+```
 
+##### 8. ajax、axios、fetch的区别
 
+![ajax、fetch和axios的区别](.\图\ajax、fetch和axios的区别.jpg)
 
-##### 14. 常见的DOM操作有哪些
+**（1）AJAX**
 
+Ajax 即“AsynchronousJavascriptAndXML”（异步 JavaScript 和 XML），是指一种创建交互式[网页](https://link.zhihu.com/?target=https%3A//baike.baidu.com/item/%E7%BD%91%E9%A1%B5)应用的网页开发技术。它是一种在无需重新加载整个网页的情况下，能够更新部分网页的技术。通过在后台与服务器进行少量数据交换，Ajax 可以使网页实现异步更新。这意味着可以在不重新加载整个网页的情况下，对网页的某部分进行更新。传统的网页（不使用 Ajax）如果需要更新内容，必须重载整个网页页面。其缺点如下：
 
+- 本身是针对MVC编程，不符合前端MVVM的浪潮
+- 基于原生XHR开发，XHR本身的架构不清晰
+- 不符合关注分离（Separation of Concerns）的原则
+- 配置和调用方式非常混乱，而且基于事件的异步模型不友好。
 
-##### 15. use strict是什么意思 ? 使用它区别是什么？ 
+**（2）Fetch**
 
+fetch号称是AJAX的替代品，是在ES6出现的，使用了ES6中的promise对象。Fetch是基于promise设计的。Fetch的代码结构比起ajax简单多。**fetch不是ajax的进一步封装，而是原生js，没有使用XMLHttpRequest对象**。
 
+fetch的优点：
 
-##### 16. 如何判断一个对象是否属于某个类？
+- 语法简洁，更加语义化
+- 基于标准 Promise 实现，支持 async/await
+- 更加底层，提供的API丰富（request, response）
+- 脱离了XHR，是ES规范里新的实现方式
 
+fetch的缺点：
 
+- fetch只对网络请求报错，对400，500都当做成功的请求，服务器返回 400，500 错误码时并不会 reject，只有网络错误这些导致请求不能完成时，fetch 才会被 reject。
+- fetch默认不会带cookie，需要添加配置项： fetch(url, {credentials: 'include'})
+- fetch不支持abort，不支持超时控制，使用setTimeout及Promise.reject的实现的超时控制并不能阻止请求过程继续在后台运行，造成了流量的浪费
+- fetch没有办法原生监测请求的进度，而XHR可以
 
-##### 17. for...in和for...of的区别
+**（3）Axios**
 
+Axios 是一种基于Promise封装的HTTP客户端，其特点如下：
 
+- 浏览器端发起XMLHttpRequests请求
+- node端发起http请求
+- 支持Promise API
+- 监听请求和返回
+- 对请求和返回进行转化
+- 取消请求
+- 自动转换json数据
+- 客户端支持抵御XSRF攻击
 
-##### 18. 如何使用for...of遍历对象
+##### 9. JavaScript为什么要进行变量提升，它导致了什么问题？
 
+变量提升的表现是，无论在函数中何处位置声明的变量，好像都被提升到了函数的首部，可以在变量声明前访问到而不会报错。
 
+造成变量声明提升的**本质原因**是 js 引擎在代码执行前有一个解析的过程，创建了执行上下文，初始化了一些代码执行时需要用到的对象。当访问一个变量时，会到当前执行上下文中的作用域链中去查找，而作用域链的首端指向的是当前执行上下文的变量对象，这个变量对象是执行上下文的一个属性，它包含了函数的形参、所有的函数和变量声明，这个对象的是在代码解析的时候创建的。
 
-##### 19. ajax、axios、fetch的区别
+首先要知道，JS在拿到一个变量或者一个函数的时候，会有两步操作，即解析和执行。
 
+- **在解析阶段**，JS会检查语法，并对函数进行预编译。解析的时候会先创建一个全局执行上下文环境，先把代码中即将执行的变量、函数声明都拿出来，变量先赋值为undefined，函数先声明好可使用。在一个函数执行之前，也会创建一个函数执行上下文环境，跟全局执行上下文类似，不过函数执行上下文会多出this、arguments和函数的参数。
+- - 全局上下文：变量定义，函数声明
+  - 函数上下文：变量定义，函数声明，this，arguments
+- **在执行阶段**，就是按照代码的顺序依次执行。
 
+那为什么会进行变量提升呢？主要有以下两个原因：
+
+- 提高性能
+- 容错性更好
+
+**（1）提高性能**
+
+在JS代码执行之前，会进行语法检查和预编译，并且这一操作只进行一次。这么做就是为了提高性能，如果没有这一步，那么每次执行代码前都必须重新解析一遍该变量（函数），而这是没有必要的，因为变量（函数）的代码并不会改变，解析一遍就够了。
+
+在解析的过程中，还会为函数生成预编译代码。在预编译时，会统计声明了哪些变量、创建了哪些函数，并对函数的代码进行压缩，去除注释、不必要的空白等。这样做的好处就是每次执行函数时都可以直接为该函数分配栈空间（不需要再解析一遍去获取代码中声明了哪些变量，创建了哪些函数），并且因为代码压缩的原因，代码执行也更快了。
+
+**（2）容错性更好**
+
+变量提升可以在一定程度上提高JS的容错性，看下面的代码：
+
+```js
+a = 1;
+var a;
+console.log(a);
+```
+
+如果没有变量提升，这两行代码就会报错，但是因为有了变量提升，这段代码就可以正常执行。
+
+虽然，在可以开发过程中，可以完全避免这样写，但是有时代码很复杂的时候。可能因为疏忽而先使用后定义了，这样也不会影响正常使用。由于变量提升的存在，而会正常运行。
+
+**总结：**
+
+- 解析和预编译过程中的声明提升可以提高性能，让函数可以在执行时预先为变量分配栈空间
+- 声明提升还可以提高JS代码的容错性，使一些不规范的代码也可以正常执行
+
+变量提升虽然有一些优点，但是他也会造成一定的问题，在ES6中提出了let、const来定义变量，它们就没有变量提升的机制。下面看一下变量提升可能会导致的问题：
+
+```js
+var tmp = new Date();
+
+function fn(){
+    console.log(tmp);
+    if(false){
+        var tmp = 'hello world';
+    }
+}
+
+fn();  // undefined
+
+```
+
+在这个函数中，原本是要打印出外层的tmp变量，但是因为变量提升的问题，内层定义的tmp被提到函数内部的最顶部，相当于覆盖了外层的tmp，所以打印结果为undefined。
+
+```js
+var tmp = 'hello world';
+
+for (var i = 0; i < tmp.length; i++) {
+    console.log(tmp[i]);
+}
+
+console.log(i); // 11
+```
+
+由于遍历时定义的i会变量提升成为一个全局变量，在函数结束之后不会被销毁，所以打印出来11。
+
+##### 10. use strict是什么意思 ? 使用它区别是什么？
+
+use strict 是一种 ECMAscript5 添加的（严格模式）运行模式，这种模式使得 Javascript 在更严格的条件下运行。设立严格模式的目的如下：
+
+- 消除 Javascript 语法的不合理、不严谨之处，减少怪异行为;
+- 消除代码运行的不安全之处，保证代码运行的安全；
+- 提高编译器效率，增加运行速度；
+- 为未来新版本的 Javascript 做好铺垫。
+
+区别：
+
+- 禁止使用 with 语句。
+- 禁止 this 关键字指向全局对象。
+- 对象不能有重名的属性。
+
+##### 11. for...in和for...of的区别
+
+for…of 是ES6新增的遍历方式，允许遍历一个含有iterator接口的数据结构（数组、对象等）并且返回各项的值，和ES3中的for…in的区别如下
+
+- for…of 遍历获取的是对象的键值，for…in 获取的是对象的键名；
+- for… in 会遍历对象的整个原型链，性能非常差不推荐使用，而 for … of 只遍历当前对象不会遍历原型链；
+- 对于数组的遍历，for…in 会返回数组中所有可枚举的属性(包括原型链上可枚举的属性)，for…of 只返回数组的下标对应的属性值；
+
+**总结：**for...in 循环主要是为了遍历对象而生，不适用于遍历数组；for...of 循环可以用来遍历数组、类数组对象，字符串、Set、Map 以及 Generator 对象。
+
+##### 12. 如何使用for...of遍历对象
+
+具体参照手写代码（实现iterator）
+
+##### 13. 什么是尾调用，使用尾调用有什么好处？
+
+尾调用指的是函数的最后一步调用另一个函数。代码执行是基于执行栈的，所以当在一个函数里调用另一个函数时，会保留当前的执行上下文，然后再新建另外一个执行上下文加入栈中。使用尾调用的话，因为已经是函数的最后一步，所以这时可以不必再保留当前的执行上下文，从而节省了内存，这就是尾调用优化。但是 ES6 的尾调用优化只在严格模式下开启，正常模式是无效的。
+
+##### 14. **ES6**模块与**CommonJS**模块有什么异同？
+
+ES6 Module和CommonJS模块的区别：
+
+- CommonJS是对模块的浅拷⻉，ES6 Module是对模块的引⽤，即ES6 Module只存只读，不能改变其值，也就是指针指向不能变，类似const；
+- import的接⼝是read-only（只读状态），不能修改其变量值。 即不能修改其变量的指针指向，但可以改变变量内部指针指向，可以对commonJS对重新赋值（改变指针指向），但是对ES6 Module赋值会编译报错。
+
+ES6 Module和CommonJS模块的共同点：
+
+- CommonJS和ES6 Module都可以对引⼊的对象进⾏赋值，即对对象内部属性的值进⾏改变。
 
 ## 四、 原型与原型链
 

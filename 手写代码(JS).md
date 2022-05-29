@@ -147,7 +147,46 @@ class EventBus {
 }
 ```
 
-### 六、
+### 六、实现Iterator
+
+```js
+// 数组迭代器
+const arrIterator = function (arr) {
+  let index = 0;
+  return {
+    next() {
+      return index < arr.length
+  		? { done: false, value: arr[index++] }
+  		: { done: true, value: undefined };
+    }
+  };
+};
+  
+// 可迭代对象，当对象具有迭代器时，使用展开运算符会优先使用迭代器，而不是类似entries的功能
+const iterableObj = {
+  id: 1,
+  name: 'nil',
+  age: 18,
+  [Symbol.iterator]: function () {
+    const keys = Object.keys(this);
+    let index = 0;
+    // 该对象是一个迭代器
+    return {
+      next: () => {
+          return index < keys.length
+        ?  { done: false, value: this[keys[index++]] }
+        :  { done: true, value: undefined };
+      },
+      // break终止
+      return: () => {
+        return { done: true, value: undefined };
+      }
+    };
+  }
+};
+```
+
+### 七、
 
 
 
