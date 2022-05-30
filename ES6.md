@@ -501,7 +501,7 @@
   + WeakMap 应用场景
 
 
-   ![响应式原理使用WeakMap](E:\前端学习\frontend_note\图\响应式原理使用WeakMap.jpg)
+   ![响应式原理使用WeakMap](.\图\响应式原理使用WeakMap.jpg)
 
 - 一些常用API：
 

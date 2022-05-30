@@ -1680,6 +1680,7 @@ function setInterval(callback, interval) {
   let startTime = now()
   let endTime = startTime
   const loop = () => {
+    window.cancelAnimationFrame(timer);
     timer = window.requestAnimationFrame(loop)
     endTime = now()
     if (endTime - startTime >= interval) {
