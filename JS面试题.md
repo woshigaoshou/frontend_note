@@ -1206,101 +1206,521 @@ function iterate(obj){
 
 ##### 1. 对闭包的理解
 
+**闭包是指有权访问另一个函数作用域中变量的函数**，创建闭包的最常见的方式就是在一个函数内创建另一个函数，创建的函数可以访问到当前函数的局部变量。
 
+闭包有两个常用的用途；
+
+- 闭包的第一个用途是使我们在函数外部能够访问到函数内部的变量。通过使用闭包，可以通过在外部调用闭包函数，从而在外部访问到函数内部的变量，可以使用这种方法来创建私有变量。
+- 闭包的另一个用途是使已经运行结束的函数上下文中的变量对象继续留在内存中，因为闭包函数保留了这个变量对象的引用，所以这个变量对象不会被回收。
+
+比如，函数 A 内部有一个函数 B，函数 B 可以访问到函数 A 中的变量，那么函数 B 就是闭包。
+
+```js
+function A() {
+  let a = 1
+  window.B = function () {
+      console.log(a)
+  }
+}
+A()
+B() // 1
+```
+
+在 JS 中，闭包存在的意义就是让我们可以间接访问函数内部的变量。经典面试题：循环中使用闭包解决 var 定义函数的问题
+
+```js
+for (var i = 1; i <= 5; i++) {
+  setTimeout(function timer() {
+    console.log(i)
+  }, i * 1000)
+}
+```
+
+首先因为 `setTimeout` 是个异步函数，所以会先把循环全部执行完毕，这时候 `i` 就是 6 了，所以会输出一堆 6。解决办法有三种：
+
+- 第一种是使用闭包的方式
+
+```js
+for (var i = 1; i <= 5; i++) {
+  ;(function(j) {
+    setTimeout(function timer() {
+      console.log(j)
+    }, j * 1000)
+  })(i)
+}
+```
+
+在上述代码中，首先使用了立即执行函数将 `i` 传入函数内部，这个时候值就被固定在了参数 `j` 上面不会改变，当下次执行 `timer` 这个闭包的时候，就可以使用外部函数的变量 `j`，从而达到目的。
+
+- 第二种就是使用 `setTimeout` 的第三个参数，这个参数会被当成 `timer` 函数的参数传入。
+
+```js
+for (var i = 1; i <= 5; i++) {
+  setTimeout(
+    function timer(j) {
+      console.log(j)
+    },
+    i * 1000,
+    i
+  )
+}
+```
+
+- 第三种就是使用 `let` 定义 `i` 了来解决问题了，这个也是最为推荐的方式
+
+```js
+for (let i = 1; i <= 5; i++) {
+  setTimeout(function timer() {
+    console.log(i)
+  }, i * 1000)
+}
+```
 
 ##### 2. 对作用域、作用域链的理解
 
+##### 1）全局作用域和函数作用域
 
+（1）全局作用域
+
+- 最外层函数和最外层函数外面定义的变量拥有全局作用域
+- 所有未定义直接赋值的变量自动声明为全局作用域
+- 所有window对象的属性拥有全局作用域
+- 全局作用域有很大的弊端，过多的全局作用域变量会污染全局命名空间，容易引起命名冲突。
+
+（2）函数作用域
+
+- 函数作用域声明在函数内部的变零，一般只有固定的代码片段可以访问到
+- 作用域是分层的，内层作用域可以访问外层作用域，反之不行
+
+##### 2）块级作用域
+
+- 使用ES6中新增的let和const指令可以声明块级作用域，块级作用域可以在函数中创建也可以在一个代码块中的创建（由`{ }`包裹的代码片段）
+- let和const声明的变量不会有变量提升，也不可以重复声明
+- 在循环中比较适合绑定块级作用域，这样就可以把声明的计数器变量限制在循环内部。
+
+**作用域链：**
+
+在当前作用域中查找所需变量，但是该作用域没有这个变量，那这个变量就是自由变量。如果在自己作用域找不到该变量就去父级作用域查找，依次向上级作用域查找，直到访问到window对象就被终止，这一层层的关系就是作用域链。
+
+作用域链的作用是**保证对执行环境有权访问的所有变量和函数的有序访问，通过作用域链，可以访问到外层环境的变量和函数。**
+
+作用域链的本质上是一个指向变量对象的指针列表。变量对象是一个包含了执行环境中所有变量和函数的对象。作用域链的前端始终都是当前执行上下文的变量对象。全局执行上下文的变量对象（也就是全局对象）始终是作用域链的最后一个对象。
+
+当查找一个变量时，如果当前执行环境中没有找到，可以沿着作用域链向后查找。
 
 ##### 3. 对执行上下文的理解
 
+##### 1. 执行上下文类型
 
+**（1）全局执行上下文**
 
+任何不在函数内部的都是全局执行上下文，它首先会创建一个全局的window对象，并且设置this的值等于这个全局对象，一个程序中只有一个全局执行上下文。
 
+**（2）函数执行上下文**
 
-## 六、 this/call/apply/bind
+当一个函数被调用时，就会为该函数创建一个新的执行上下文，函数的上下文可以有任意多个。
+
+**（3）**`**eval**`**函数执行上下文**
+
+执行在eval函数中的代码会有属于他自己的执行上下文，不过eval函数不常使用，不做介绍。
+
+##### 2. 执行上下文栈
+
+- JavaScript引擎使用执行上下文栈来管理执行上下文
+- 当JavaScript执行代码时，首先遇到全局代码，会创建一个全局执行上下文并且压入执行栈中，每当遇到一个函数调用，就会为该函数创建一个新的执行上下文并压入栈顶，引擎会执行位于执行上下文栈顶的函数，当函数执行完成之后，执行上下文从栈中弹出，继续执行下一个上下文。当所有的代码都执行完毕之后，从栈中弹出全局执行上下文。
+
+```
+let a = 'Hello World!';
+function first() {
+  console.log('Inside first function');
+  second();
+  console.log('Again inside first function');
+}
+function second() {
+  console.log('Inside second function');
+}
+first();
+//执行顺序
+//先执行second(),在执行first()
+```
+
+##### 3. 创建执行上下文
+
+创建执行上下文有两个阶段：**创建阶段**和**执行阶段**
+
+**1）创建阶段**
+
+（1）this绑定
+
+- 在全局执行上下文中，this指向全局对象（window对象）
+- 在函数执行上下文中，this指向取决于函数如何调用。如果它被一个引用对象调用，那么 this 会被设置成那个对象，否则 this 的值被设置为全局对象或者 undefined
+
+（2）创建词法环境组件
+
+- 词法环境是一种有**标识符——变量映射**的数据结构，标识符是指变量/函数名，变量是对实际对象或原始数据的引用。
+- 词法环境的内部有两个组件：
+  - **环境记录器(VE，ES5称为VO)** ：用来储存变量个函数声明的实际位置
+  - **外部环境的引用([[scope]])**：可以访问父级作用域
+
+（3）创建变量环境组件
+
+- 变量环境也是一个词法环境，其环境记录器持有变量声明语句在执行上下文中创建的绑定关系。
+
+**2）执行阶段**
+
+此阶段会完成对变量的分配，最后执行完代码。
+
+**简单来说执行上下文就是指：**
+
+在执行一点JS代码之前，需要先解析代码。解析的时候会先创建一个全局执行上下文环境，先把代码中即将执行的变量、函数声明都拿出来，变量先赋值为undefined，函数先声明好可使用。这一步执行完了，才开始正式的执行程序。
+
+在一个函数执行之前，也会创建一个函数执行上下文环境，跟全局执行上下文类似，不过函数执行上下文会多出this、arguments和函数的参数。
+
+- 全局上下文：变量定义，函数声明
+- 函数上下文：变量定义，函数声明，`this`，`arguments`
+
+## 六、 this/call/apply/bind（参考JS高级第四部分）
 
 ##### 1. 对this对象的理解
 
-
-
 ##### 2. call() 和 apply() 的区别？
 
-
-
 ##### 3. 实现call、apply 及 bind 函数（建议看一下鲨鱼哥的掘金手写）
-
-
 
 ## 七、异步编程
 
 ##### 1. 异步编程的实现方式？
 
+JavaScript中的异步机制可以分为以下几种：
+
+- **回调函数** 的方式，使用回调函数的方式有一个缺点是，多个回调函数嵌套的时候会造成回调函数地狱，上下两层的回调函数间的代码耦合度太高，不利于代码的可维护。
+- **Promise** 的方式，使用 Promise 的方式可以将嵌套的回调函数作为链式调用。但是使用这种方法，有时会造成多个 then 的链式调用，可能会造成代码的语义不够明确。
+- **generator** 的方式，它可以在函数的执行过程中，将函数的执行权转移出去，在函数外部还可以将执行权转移回来。当遇到异步函数执行的时候，将函数执行权转移出去，当异步函数执行完毕时再将执行权给转移回来。因此在 generator 内部对于异步操作的方式，可以以同步的顺序来书写。使用这种方式需要考虑的问题是何时将函数的控制权转移回来，因此需要有一个自动执行 generator 的机制，比如说 co 模块等方式来实现 generator 的自动执行。
+- **async 函数** 的方式，async 函数是 generator 和 promise 实现的一个自动执行的语法糖，它内部自带执行器，当函数内部执行到一个 await 语句的时候，如果语句返回一个 promise 对象，那么函数将会等待 promise 对象的状态变为 resolve 后再继续向下执行。因此可以将异步逻辑，转化为同步的顺序来书写，并且这个函数可以自动执行。
+
 ##### 2. setTimeout、Promise、Async/Await 的区别
+
+#### （1）setTimeout
+
+```js
+console.log('script start') //1. 打印 script start
+setTimeout(function(){
+    console.log('settimeout')   // 4. 打印 settimeout
+})  // 2. 调用 setTimeout 函数，并定义其完成后执行的回调函数
+console.log('script end')   //3. 打印 script start
+// 输出顺序：script start->script end->settimeout
+```
+
+#### （2）Promise
+
+Promise本身是**同步的立即执行函数**， 当在executor中执行resolve或者reject的时候, 此时是异步操作， 会先执行then/catch等，当主栈完成后，才会去调用resolve/reject中存放的方法执行，打印p的时候，是打印的返回结果，一个Promise实例。
+
+```js
+console.log('script start')
+let promise1 = new Promise(function (resolve) {
+    console.log('promise1')
+    resolve()
+    console.log('promise1 end')
+}).then(function () {
+    console.log('promise2')
+})
+setTimeout(function(){
+    console.log('settimeout')
+})
+console.log('script end')
+// 输出顺序: script start->promise1->promise1 end->script end->promise2->settimeout
+```
+
+当JS主线程执行到Promise对象时：
+
+- promise1.then() 的回调就是一个 task
+- promise1 是 resolved或rejected: 那这个 task 就会放入当前事件循环回合的 microtask queue（微任务队列）
+- promise1 是 pending: 这个 task 就会放入 事件循环的未来的某个(可能下一个)回合的 microtask queue 中
+- setTimeout 的回调也是个 task ，它会被放入 macrotask queue（宏任务队列） 即使是 0ms 的情况
+
+#### （3）async/await
+
+```js
+async function async1(){
+   console.log('async1 start');
+    await async2();
+    console.log('async1 end')
+}
+async function async2(){
+    console.log('async2')
+}
+console.log('script start');
+async1();
+console.log('script end')
+// 输出顺序：script start->async1 start->async2->script end->async1 end
+```
+
+async 函数返回一个 Promise 对象，当函数执行的时候，一旦遇到 await 就会先返回，等到触发的异步操作完成，再执行函数体内后面的语句。可以理解为，是让出了线程，跳出了 async 函数体。
+
+例如：
+
+```js
+async function func1() {
+    return 1
+}
+console.log(func1())
+```
+
+`func1` 的运行结果其实就是一个Promise对象。因此也可以使用then来处理后续逻辑。
+
+```
+func1().then(res => {
+    console.log(res);  // 30
+})
+```
+
+await的含义为等待，也就是 async 函数需要等待await后的函数执行完成并且有了返回结果（Promise对象）之后，才能继续执行下面的代码。await通过返回一个Promise对象来实现同步的效果。
 
 ##### 3. 对Promise的理解
 
+Promise是异步编程的一种解决方案，它是一个对象，可以获取异步操作的消息，他的出现大大改善了异步编程的困境，避免了地狱回调，它比传统的解决方案回调函数和事件更合理和更强大。
 
+所谓Promise，简单说就是一个容器，里面保存着某个未来才会结束的事件（通常是一个异步操作）的结果。从语法上说，Promise 是一个对象，从它可以获取异步操作的消息。Promise 提供统一的 API，各种异步操作都可以用同样的方法进行处理。
 
-##### 4. Promise的基本用法
+（1）Promise的实例有**三个状态**:
 
+- Pending（进行中）
+- Resolved（已完成）
+- Rejected（已拒绝）
 
+当把一件事情交给promise时，它的状态就是Pending，任务完成了状态就变成了Resolved、没有完成失败了就变成了Rejected。
 
-##### 5. Promise解决了什么问题
+（2）Promise的实例有**两个过程**：
 
+- pending -> fulfilled : Resolved（已完成）
+- pending -> rejected：Rejected（已拒绝）
 
+注意：一旦从进行状态变成为其他状态就永远不能更改状态了。
 
-##### 6. Promise.all和Promise.race的区别的使用场景
+**Promise的特点：**
 
+- 对象的状态不受外界影响。promise对象代表一个异步操作，有三种状态，`pending`（进行中）、`fulfilled`（已成功）、`rejected`（已失败）。只有异步操作的结果，可以决定当前是哪一种状态，任何其他操作都无法改变这个状态，这也是promise这个名字的由来——“**承诺**”；
+- 一旦状态改变就不会再变，任何时候都可以得到这个结果。promise对象的状态改变，只有两种可能：从`pending`变为`fulfilled`，从`pending`变为`rejected`。这时就称为`resolved`（已定型）。如果改变已经发生了，你再对promise对象添加回调函数，也会立即得到这个结果。这与事件（event）完全不同，事件的特点是：如果你错过了它，再去监听是得不到结果的。
 
+**Promise的缺点：**
 
-##### 7. 对async/await 的理解
+- 无法取消Promise，一旦新建它就会立即执行，无法中途取消。
+- 如果不设置回调函数，Promise内部抛出的错误，不会反应到外部。
+- 当处于pending状态时，无法得知目前进展到哪一个阶段（刚刚开始还是即将完成）。
 
+**总结：**
 
+Promise 对象是异步编程的一种解决方案，最早由社区提出。Promise 是一个构造函数，接收一个函数作为参数，返回一个 Promise 实例。一个 Promise 实例有三种状态，分别是pending、resolved 和 rejected，分别代表了进行中、已成功和已失败。实例的状态只能由 pending 转变 resolved 或者rejected 状态，并且状态一经改变，就凝固了，无法再被改变了。
 
-##### 8. await 到底在等啥？
+状态的改变是通过 resolve() 和 reject() 函数来实现的，可以在异步操作结束后调用这两个函数改变 Promise 实例的状态，它的原型上定义了一个 then 方法，使用这个 then 方法可以为两个状态的改变注册回调函数。这个回调函数属于微任务，会在本轮事件循环的末尾执行。
 
+**注意：**在构造 `Promise` 的时候，构造函数内部的代码是立即执行的
 
+##### 4. Promise.all和Promise.race的区别的使用场景
 
-##### 9. async/await的优势
+**（1）Promise.all**
 
+`Promise.all`可以将多个`Promise`实例包装成一个新的Promise实例。同时，成功和失败的返回值是不同的，成功的时候返回的是**一个结果数组**，而失败的时候则返回**最先被reject失败状态的值**。
 
+Promise.all中传入的是数组，返回的也是是数组，并且会将进行映射，传入的promise对象返回的值是按照顺序在数组中排列的，但是注意的是他们执行的顺序并不是按照顺序的，除非可迭代对象为空。
 
-##### 10. async/await对比Promise的优势
+需要注意，Promise.all获得的成功结果的数组里面的数据顺序和Promise.all接收到的数组顺序是一致的，这样当遇到发送多个请求并根据请求顺序获取和使用数据的场景，就可以使用Promise.all来解决。
 
+**（2）Promise.race**
 
+顾名思义，Promse.race就是赛跑的意思，意思就是说，Promise.race([p1, p2, p3])里面哪个结果获得的快，就返回那个结果，不管结果本身是成功状态还是失败状态。当要做一件事，超过多长时间就不做了，可以用这个方法来解决：
 
-##### 11. async/await 如何捕获异常
+```js
+Promise.race([promise1,timeOutPromise(5000)]).then(res=>{})
+```
 
+##### 5. 对async/await 的理解
 
+async/await其实是`Generator` 的语法糖，它能实现的效果都能用then链来实现，它是为优化then链而开发出来的。从字面上来看，async是“异步”的简写，await则为等待，所以很好理解async 用于申明一个 function 是异步的，而 await 用于等待一个异步方法执行完成。当然语法上强制规定await只能出现在asnyc函数中，先来看看async函数返回了什么：
 
-##### 12. 什么是回调函数？回调函数有什么缺点？如何解决回调地狱问题？
+```
+async function testAsy(){
+   return 'hello world';
+}
+let result = testAsy(); 
+console.log(result)
 
+```
 
+[![img](https://camo.githubusercontent.com/754eeb4c06efdce763583d7255e5bb0046d12a823fb4512353fd515214b559f4/68747470733a2f2f63646e2e6e6c61726b2e636f6d2f79757175652f302f323032302f706e672f313530303630342f313630353039393431313837332d64326561633235612d356438632d343538362d626333362d3736396263653739303130652e706e67)](https://camo.githubusercontent.com/754eeb4c06efdce763583d7255e5bb0046d12a823fb4512353fd515214b559f4/68747470733a2f2f63646e2e6e6c61726b2e636f6d2f79757175652f302f323032302f706e672f313530303630342f313630353039393431313837332d64326561633235612d356438632d343538362d626333362d3736396263653739303130652e706e67)
 
-##### 13. setTimeout、setInterval、requestAnimationFrame 各有什么特点？
+所以，async 函数返回的是一个 Promise 对象。async 函数（包含函数语句、函数表达式、Lambda表达式）会返回一个 Promise 对象，如果在函数中 `return` 一个直接量，async 会把这个直接量通过 `Promise.resolve()` 封装成 Promise 对象。
 
+async 函数返回的是一个 Promise 对象，所以在最外层不能用 await 获取其返回值的情况下，当然应该用原来的方式：`then()` 链来处理这个 Promise 对象，就像这样：
 
+```
+async function testAsy(){
+   return 'hello world'
+}
+let result = testAsy() 
+console.log(result)
+result.then(v=>{
+    console.log(v)   // hello world
+})
 
-## 八、面向对象
+```
+
+那如果 async 函数没有返回值，又该如何？很容易想到，它会返回 `Promise.resolve(undefined)`。
+
+联想一下 Promise 的特点——无等待，所以在没有 `await` 的情况下执行 async 函数，它会立即执行，返回一个 Promise 对象，并且，绝不会阻塞后面的语句。这和普通返回 Promise 对象的函数并无二致。
+
+**注意：**`Promise.resolve(x)` 可以看作是 `new Promise(resolve => resolve(x))` 的简写，可以用于快速封装字面量对象或其他对象，将其封装成 Promise 实例。
+
+##### 6. await 到底在等啥？
+
+**await 在等待什么呢？**一般来说，都认为 await 是在等待一个 async 函数完成。不过按语法说明，await 等待的是一个表达式，这个表达式的计算结果是 Promise 对象或者其它值（换句话说，就是没有特殊限定）。
+
+因为 async 函数返回一个 Promise 对象，所以 await 可以用于等待一个 async 函数的返回值——这也可以说是 await 在等 async 函数，但要清楚，它等的实际是一个返回值。注意到 await 不仅仅用于等 Promise 对象，它可以等任意表达式的结果，所以，await 后面实际是可以接普通函数调用或者直接量的。所以下面这个示例完全可以正确运行：
+
+```
+function getSomething() {
+    return "something";
+}
+async function testAsync() {
+    return Promise.resolve("hello async");
+}
+async function test() {
+    const v1 = await getSomething();
+    const v2 = await testAsync();
+    console.log(v1, v2);
+}
+test();
+
+```
+
+await 表达式的运算结果取决于它等的是什么。
+
+- 如果它等到的不是一个 Promise 对象，那 await 表达式的运算结果就是它等到的东西。
+- 如果它等到的是一个 Promise 对象，await 就忙起来了，它会阻塞后面的代码，等着 Promise 对象 resolve，然后得到 resolve 的值，作为 await 表达式的运算结果。
+
+来看一个例子：
+
+```
+function testAsy(x){
+   return new Promise(resolve=>{setTimeout(() => {
+       resolve(x);
+     }, 3000)
+    }
+   )
+}
+async function testAwt(){    
+  let result =  await testAsy('hello world');
+  console.log(result);    // 3秒钟之后出现hello world
+  console.log('cuger')   // 3秒钟之后出现cug
+}
+testAwt();
+console.log('cug')  //立即输出cug
+
+```
+
+这就是 await 必须用在 async 函数中的原因。async 函数调用不会造成阻塞，它内部所有的阻塞都被封装在一个 Promise 对象中异步执行。await暂停当前async的执行，所以'cug''最先输出，hello world'和‘cuger’是3秒钟后同时出现的。
+
+##### 7. setTimeout、setInterval、requestAnimationFrame 各有什么特点？
+
+异步编程当然少不了定时器了，常见的定时器函数有 `setTimeout`、`setInterval`、`requestAnimationFrame`。最常用的是`setTimeout`，很多人认为 `setTimeout` 是延时多久，那就应该是多久后执行。
+
+其实这个观点是错误的，因为 JS 是单线程执行的，如果前面的代码影响了性能，就会导致 `setTimeout` 不会按期执行。当然了，可以通过代码去修正 `setTimeout`，从而使定时器相对准确：
+
+```js
+let period = 60 * 1000 * 60 * 2
+let startTime = new Date().getTime()
+let count = 0
+let end = new Date().getTime() + period
+let interval = 1000
+let currentInterval = interval
+function loop() {
+  count++
+  // 代码执行所消耗的时间
+  let offset = new Date().getTime() - (startTime + count * interval);
+  let diff = end - new Date().getTime()
+  let h = Math.floor(diff / (60 * 1000 * 60))
+  let hdiff = diff % (60 * 1000 * 60)
+  let m = Math.floor(hdiff / (60 * 1000))
+  let mdiff = hdiff % (60 * 1000)
+  let s = mdiff / (1000)
+  let sCeil = Math.ceil(s)
+  let sFloor = Math.floor(s)
+  // 得到下一次循环所消耗的时间
+  currentInterval = interval - offset 
+  console.log('时：'+h, '分：'+m, '毫秒：'+s, '秒向上取整：'+sCeil, '代码执行时间：'+offset, '下次循环间隔'+currentInterval) 
+  setTimeout(loop, currentInterval)
+}
+setTimeout(loop, currentInterval)
+
+```
+
+接下来看 `setInterval`，其实这个函数作用和 `setTimeout` 基本一致，只是该函数是每隔一段时间执行一次回调函数。
+
+通常来说不建议使用 `setInterval`。第一，它和 `setTimeout` 一样，不能保证在预期的时间执行任务。第二，它存在执行累积的问题，请看以下伪代码
+
+```js
+function demo() {
+  setInterval(function(){
+    console.log(2)
+  },1000)
+  sleep(2000)
+}
+demo()
+
+```
+
+以上代码在浏览器环境中，如果定时器执行过程中出现了耗时操作，多个回调函数会在耗时操作结束以后同时执行，这样可能就会带来性能上的问题。
+
+如果有循环定时器的需求，其实完全可以通过 `requestAnimationFrame` 来实现：
+
+```js
+function setInterval(callback, interval) {
+  let timer
+  const now = Date.now
+  let startTime = now()
+  let endTime = startTime
+  const loop = () => {
+    timer = window.requestAnimationFrame(loop)
+    endTime = now()
+    if (endTime - startTime >= interval) {
+      startTime = endTime = now()
+      callback(timer)
+    }
+  }
+  timer = window.requestAnimationFrame(loop)
+  return timer
+}
+let a = 0
+setInterval(timer => {
+  console.log(1)
+  a++
+  if (a === 3) cancelAnimationFrame(timer)
+}, 1000)
+
+```
+
+首先 `requestAnimationFrame` 自带函数节流功能，基本可以保证在 16.6 毫秒内只执行一次（不掉帧的情况下），并且该函数的延时效果是精确的，没有其他定时器时间不准的问题，当然你也可以通过该函数来实现 `setTimeout`。
+
+## 八、面向对象（参考JS高级第七章）
 
 ##### 1.对象创建的方式有哪些？ 
 
-
-
 ##### 2. 对象继承的方式有哪些？
-
-
 
 ## 九、 垃圾回收与内存泄漏
 
 ##### 1. 浏览器的垃圾回收机制
 
-
+参考 `JS高级` 第二章
 
 ##### 2. 哪些情况会导致内存泄漏
 
+以下四种情况会造成内存的泄漏：
 
+- **意外的全局变量：**由于使用未声明的变量，而意外的创建了一个全局变量，而使这个变量一直留在内存中无法被回收。
+- **被遗忘的计时器或回调函数：**设置了 setInterval 定时器，而忘记取消它，如果循环函数有对外部变量的引用的话，那么这个变量会被一直留在内存中，而无法被回收。
+- **脱离 DOM 的引用：**获取一个 DOM 元素的引用，而后面这个元素被删除，由于一直保留了对这个元素的引用，所以它也无法被回收。
+- **闭包：**不合理的使用闭包，从而导致某些变量一直被留在内存当中。
 
 
 
