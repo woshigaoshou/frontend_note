@@ -1,3 +1,5 @@
+![HTML面试题](.\图\HTML面试题.png)
+
 ##### 1. 如何理解HTML语义化
 
 - 常见语义化标签：`header`、`nav`、`aside`、`footer`、`section`、`main`等;
