@@ -244,6 +244,8 @@
             })
           } else {
             // 若then不为函数，直接resolve x
+            if (called) return;
+            called = true;
             resolve(x);
           }
         } catch (err) {
