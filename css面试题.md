@@ -4,7 +4,7 @@
 
 ##### 1. CSS选择器及权重
 
-权重之间的进制是256的，也就是1和10之间相差了255。`!import`优先级最高，优先级相同的情况下，后者会覆盖前者的样式。
+权重之间的进制是256的，也就是1和10之间	相差了255。`!import`优先级最高，优先级相同的情况下，后者会覆盖前者的样式。
 
 | 选择器    | 格式          | 权重   |
 | ------ | ----------- | ---- |
@@ -85,7 +85,7 @@ p:hover {
 
 
 - clientWidth: leftPadding + rightPadding + width - scrollbar.width(竖滚动条宽度)
-- scrollWidth: scrollTop + clientWidth（不计border和滚动条高度）
+- scrollHeight: scrollTop + clientHeight（不计border和滚动条高度）
 - offsetLeft：border外层距离父元素的border内层的距离（父元素需要非static定位，若无则是html标签）
 - clientY：距离浏览器可视范围顶部的距离
 - pageY：距离document最顶部的距离（滚动距离也计算）
@@ -172,9 +172,9 @@ display: -webkit-box;
 以图片显示为例：
 
 - `window.innerHeight` 是浏览器可视区的高度；
-- `document.body.scrollTop || document.documentElement.scrollTop` 是浏览器滚动的过的距离；
+- `document.body.scrollTop || document.documentElement.scrollTop` 是浏览器滚动过的距离；
 - `imgs.offsetTop` 是元素顶部距离文档顶部的高度（包括滚动条的距离）；
-- 内容达到显示区域的：`img.offsetTop < window.innerHeight + document.body.scrollTop;`
+- 内容达到显示区域的：`document.body.scrollTop < img.offsetTop < window.innerHeight + document.body.scrollTop;`
 
 ![判断可视区域](.\图\判断可视区域.png)
 
