@@ -583,7 +583,7 @@
 
     * 事件队列类型：每个队列的执行顺序如下
       * `microtask queue`：
-        * `next Tick queue`：process.nextTick
+        * `next Tick queue`：process.nextTick（执行优先级高于other queue）
         * `other queue`：Promise.then、queueMicrotask
       * `macrotask queue`：
         * `timer queue`：setTimeout、setInterval

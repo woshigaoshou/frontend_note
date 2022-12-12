@@ -1,20 +1,20 @@
 ### 一、执行上下文栈(Execution Context Stack，ES6前)
 
-1. 在转换为 `AST` 的过程中，V8引擎会创建一个 `Global Object(全局对象，简称GO)`。 
+1. 在转换为 `AST` 的过程中(parse模块转换)，V8引擎会创建一个 `Global Object(全局对象，简称GO)`。 
 
 2. `JS` 引擎内部具有一个**执行上下文栈(简称ECS)** ，是用于执行代码的**调用栈**。
 
 3. 为了执行全局的代码块，会创建一个**全局执行上下文** (`Global Execution Context，简称GEC`)，此时 `GEC` 会被放入 `ECS` 中执行
 
-4. `VO` ：在全局执行上下文中，称为`GO` ，在函数上下文中，称为 `AO `，最新的ECMA标准使用`Variable Environment` ，在变量环境里面添加环境记录
+4. `VO` ：在全局执行上下文中，称为`GO` ，在函数上下文中，称为 `AO `，最新的ECMA标准使用`Variable Environment` ，在变量环境里面添加环境记录，若遇到的是
 
 5. 声明一个函数并调用时，会做出以下操作：
 
    + 保存作用域链到内部属性 `[[scope]]` 
    + 执行该函数，将函数执行上下文(`FEC`)压入调用栈(以下操作都在执行上下文进行)
    + 复制函数的`[[scope]]` 属性创建作用域链
-   + 初始化 `AO` ：
-     * 形参：若传入实参，则value为实参（若有默认参数，则参数内部会形成一个单独的作用域）
+   + 初始化 `AO` (activation object)：
+     * 形参(统一参数)：若传入实参，则value为实参（若有默认参数，则参数内部会形成一个单独的作用域）
      * 函数：值为函数对应的地址，若存在变量名称，则直接替换
      * 变量：值为赋予变量的值，若存在相同名称的形参或函数，会直接替换
    + 将 `AO` 压入作用域链顶端：`[AO, [[scope]]]`
@@ -98,7 +98,7 @@
      }
    }
    const bindFn = foo.bind('bind-fn');
-   const a = new obj.objFn();  // objFn() {}  证明new优先级高于隐式绑定，否则会打印obj对象
+   const a = new obj.objFn();  // objFn() {}  证明new优先级高于隐式绑定，打印了new 返回的空对象，否则会打印obj对象
    const instance = new bindFn(); // foo() {} 证明new优先级高于显示绑定
    obj.objFn.call('call-this'); // call-this  证明显示高于隐式
    obj.objFn(); // obj  不是window，证明隐式高于默认绑定
@@ -254,6 +254,15 @@
     console.log(this);  // window
   }, 1000);
   ```
+
+4. JSX语法：
+
+   ```js
+   // this指的是当前组件
+   <a>{this.$slots.default}</a>
+   ```
+
+   ​
 
 ### 七、面向对象
 
