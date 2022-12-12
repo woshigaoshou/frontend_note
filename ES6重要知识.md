@@ -212,7 +212,7 @@
     }
     static resolvePromise (promise2, x, resolve, reject) {
       // resolve 自身
-      if (promise2 === x) return reject(new TypeError('chaining cycle deteced for promise'));
+      if (promise2 === x) return reject(new TypeError('chaining cycle detected for promise'));
       // 如果是Promise实例，则自身会进行捕获错误，不需要try...catch...
       // 实际上该层判断可以去除，因为本身Promise实例也属于一个thenable，因此下一层的判断对Promise自身也是适用的
       if (x instanceof nilPromise) {
